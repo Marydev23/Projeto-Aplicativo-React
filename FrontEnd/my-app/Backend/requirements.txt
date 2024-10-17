@@ -1,0 +1,4 @@
+Flask==3.0.3
+SQLAlchemy==2.0.30
+dynaconf==3.1.7
+python-jose==3.3.0
