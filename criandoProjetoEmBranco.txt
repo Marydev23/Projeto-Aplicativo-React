@@ -1,0 +1,15 @@
+aplicativo rodar 
+
+PS C:\Users\user\Desktop\Front-End\
+ProgramacaoDispositivosMoveisEmAndroid\FrontEnd\my-app\Backend> 
+
+.\venv\Scripts\activate
+
+Voltar atras cd ..\..\
+  //const userId = 4; //buscar um morador
+
+depois python app.py
+
+
+# Para reiniciar o React Native
+npm start
