@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import URL_API from '../../utils/api-utils'
 
 export default function TabelaEntregas() {
   const navigation = useNavigation();
@@ -9,7 +10,7 @@ export default function TabelaEntregas() {
 
   useEffect(() => {
     // Função para buscar as entregas do backend
-    fetch('http://192.168.0.6:5001/entregas')
+    fetch(URL_API + '/entregas')
       .then((response) => response.json())
       .then((data) => {
         setEntregas(data);

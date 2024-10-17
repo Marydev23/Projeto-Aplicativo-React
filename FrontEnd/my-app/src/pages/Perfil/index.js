@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import URL_API from '../../utils/api-utils';
+import { useRoute } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 export default function Perfil() {
   const [usuario, setUsuario] = useState({
@@ -9,12 +12,14 @@ export default function Perfil() {
     imagemPerfil: require('../../assets/perfil.png'), 
   });
 
-  const userId = 4; 
+  const route = useRoute();
+  var user = route.params.Perfil.user;
+  console.log(user)
 
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const response = await fetch(`http://192.168.0.6:5001/perfil/${userId}`);
+        const response = await fetch(URL_API + `/perfil/${userId}`);
         const data = await response.json();
         
         console.log(data); 

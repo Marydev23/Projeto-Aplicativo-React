@@ -1,15 +1,8 @@
 from flask import Flask, request, jsonify
 import sqlite3
-from flask_cors import CORS
-from datetime import datetime 
-
-
-
-
+from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)
-
 @app.route('/')
 def home():
     return 'Bem-vindo à API!', 200
@@ -119,12 +112,6 @@ def cadastrar():
             
             print("Conexão com o banco fechada.")
 
-
-from flask import Flask, jsonify
-import sqlite3
-
-app = Flask(__name__)
-
 @app.route('/perfil/<int:user_id>', methods=['GET'])
 def get_perfil(user_id):
     try:
@@ -163,32 +150,29 @@ def get_perfil(user_id):
 def signin():
     data = request.get_json()
     email = data.get('email')
-    senha = data.get('senha1')
+    senha = data.get('senha')
 
-    
+    conn = sqlite3.connect('meubanco.db')
+    cursor = conn.cursor()
 
     try:
-        conn = sqlite3.connect('meubanco.db')
-        cursor = conn.cursor()
-
-       
-        cursor.execute("SELECT id, nome FROM Cadastro WHERE email = ? AND senha1 = ?", (email, senha))
+        cursor.execute("SELECT id, nome, email, telefone, tipo_usuario FROM Cadastro WHERE email=? AND senha1=?", (email, senha))
         user = cursor.fetchone()
-
         if user:
-            user_id = user[0]  
-            nome = user[1]  
-            return jsonify({'message': f'Login bem-sucedido, bem-vindo {nome}', 'userId': user_id}), 200
+            result = {
+                'id': user[0],
+                'nome': user[1],
+                'email': user[2],
+                'telefone': user[3],
+                'tipo_usuario': user[4]
+            }
+            return jsonify({'message': 'Login correto!', 'user': result}), 200
         else:
-            return jsonify({'error': 'Credenciais inválidas'}), 401
-
+            return jsonify({'message': 'Login inválido.'}), 401
     except sqlite3.Error as e:
-        print(f"Erro ao realizar o login: {e}")
-        return jsonify({'error': f"Erro ao realizar o login: {e}"}), 500
-
+        return jsonify({'error': f"Erro: {e}"}), 500
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
 
 @app.route('/Armarios', methods=['POST'])

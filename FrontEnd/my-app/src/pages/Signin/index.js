@@ -2,6 +2,7 @@
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
+import URL_API from '../../utils/api-utils'
 
 export default function Signin() {
   const navigation = useNavigation(); 
@@ -16,7 +17,7 @@ export default function Signin() {
   
     const SigninData = { email, senha1 };
   
-    fetch('http://192.168.0.06:5001/Signin', {
+    fetch(URL_API + '/Signin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +36,7 @@ export default function Signin() {
         if (result.userId) {
           Alert.alert(result.message);
          
-          navigation.navigate('Perfil', { userId: result.userId });
+          navigation.navigate('Perfil', { user: result.user });
         } else {
           console.error('Erro: userId não encontrado no resultado:', result);
         }
