@@ -1,16 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Retirar() {
   const navigation = useNavigation();
   const [encomendas, setEncomendas] = useState([]);
-  const userId = 1; // Substitua pelo ID do usuário logado
+  const getData = async (titulo) => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(titulo);
+      setUsuario(JSON.parse(jsonValue));
+    } catch (e) {
+      // error reading value
+      console.error(e);
+    }
+  };
+
+  const [usuario, setUsuario] = useState({})
 
   useEffect(() => {
+    getData("usuario"); 
+
     const fetchEncomendas = async () => {
       try {
-        const response = await fetch(`http://192.168.0.6:5001/retirar/${userId}`);
+        const response = await fetch(`http://172.17.5.106/Retirar/${usuario.id}`, {
+          method: 'GET'
+        });
         const data = await response.json();
         setEncomendas(data);
       } catch (error) {
@@ -19,11 +33,12 @@ export default function Retirar() {
     };
 
     fetchEncomendas();
-  }, [userId]); // Dependência do userId
+
+  }, [usuario.id]); // Dependência do userId
 
   const retirarEncomenda = async (idEncomenda, armario) => {
     try {
-      const response = await fetch(`http://192.168.0.6:5001/Retirar/${idEncomenda}`, {
+      const response = await fetch(`http://172.17.5.106:5001/Retirar/${idEncomenda}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

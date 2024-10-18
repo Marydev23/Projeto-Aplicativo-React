@@ -1,34 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import URL_API from '../../utils/api-utils';
 import { useRoute } from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Perfil() {
+
   const [usuario, setUsuario] = useState({
+    id: 0,
     nomeCompleto: '',
     endereco: '',
     telefone: '',
     imagemPerfil: require('../../assets/perfil.png'), 
+    tipo_usuario: ''
   });
-
   const route = useRoute();
-  var user = route.params.Perfil.user;
+
+  const { user } = route.params;
+
   console.log(user)
+
 
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const response = await fetch(URL_API + `/perfil/${userId}`);
+        const response = await fetch(`http://172.17.5.106:5001/perfil/${user.id}`);
         const data = await response.json();
         
         console.log(data); 
 
         if (response.ok) {
-          console.log('Nome:', data.nome); 
-          console.log('Sobrenome:', data.sobrenome); 
+          console.log('Nome:', data.nome_completo); 
+          console.log('Sobrenome:', data.nome_completo); 
           setUsuario({
-            nomeCompleto: data.nome_completo || `${data.nome} ${data.sobrenome}`, // Ajustar conforme a estrutura da API
+            nomeCompleto: data.nome_completo, // Ajustar conforme a estrutura da API
             endereco: data.endereco,
             telefone: data.telefone,
             imagemPerfil: data.imagemPerfil ? { uri: data.imagemPerfil } : require('../../assets/perfil.png'), 
@@ -42,7 +47,7 @@ export default function Perfil() {
     };
 
     fetchUsuario();
-  }, [userId]);
+  }, [usuario.id]);
 
   if (!usuario.nomeCompleto) {
     return (

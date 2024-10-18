@@ -11,6 +11,7 @@ export default function Depositar() {
   const navigation = useNavigation();
   const [selectedButton, setSelectedButton] = useState(null);
   const [nomeMorador, setNomeMorador] = useState('');
+  const [idMorador, setIdMorador] = useState(0);
   const [sugestoes, setSugestoes] = useState([]);
   const [todosMoradores, setTodosMoradores] = useState([]);
   const [entregaId, setEntregaId] = useState(null);
@@ -26,10 +27,12 @@ export default function Depositar() {
     if (!nomeMorador) return;
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.0.06:5001/buscar_morador?nome=${nomeMorador}`);
+      const response = await fetch(`http://172.17.5.106:5001/buscar_morador?nome=${nomeMorador}`, {
+        method: 'GET'
+      });
       if (!response.ok) throw new Error('Erro na rede');
       const data = await response.json();
-      console.log(data);
+      setIdMorador(data[0].id)
       setTodosMoradores(data);
     } catch (error) {
       console.error('Erro ao buscar moradores:', error);
@@ -56,7 +59,7 @@ export default function Depositar() {
   const selecionarMorador = (morador) => {
     
     setNomeMorador(`${morador.nome} ${morador.sobrenome}`);
-    
+    setIdMorador(morador.id);
     setEntregaId(morador.id);
    
     setSugestoes([]);
@@ -75,11 +78,11 @@ export default function Depositar() {
     }
     
     try {
-        const response = await fetch(URL_API+'/depositar', {
+        const response = await fetch('http://172.17.5.106:5001/depositar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                morador_id: entregaId,
+                morador_id: todosMoradores[0].id,
                 senha: senha,
                 nome: nomeMorador.split(" ")[0],          // Capturing the first name
                 sobrenome: nomeMorador.split(" ")[1],     // Capturing the last name

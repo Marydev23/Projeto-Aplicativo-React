@@ -2,7 +2,7 @@
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
-import URL_API from '../../utils/api-utils'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Signin() {
   const navigation = useNavigation(); 
@@ -17,7 +17,7 @@ export default function Signin() {
   
     const SigninData = { email, senha1 };
   
-    fetch(URL_API + '/Signin', {
+    fetch('http://172.17.5.106:5001/Signin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export default function Signin() {
       .then(result => {
         console.log('Resultado da API:', result);
   
-        if (result.userId) {
+        if (result) {
           Alert.alert(result.message);
          
           navigation.navigate('Perfil', { user: result.user });
@@ -53,7 +53,26 @@ export default function Signin() {
         Alert.alert('Erro', error.message);
       });
   };
+  const storeData = async (value, titulo) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem(titulo, jsonValue);
+    } catch (e) {
+      // saving error
+      console.error(e);
+    }
+  };
+
   
+  const getData = async (titulo) => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(titulo);
+      setUsuario(JSON.parse(jsonValue));
+    } catch (e) {
+      // error reading value
+      console.error(e);
+    }
+  };
 
   return (
     <View style={styles.container}>

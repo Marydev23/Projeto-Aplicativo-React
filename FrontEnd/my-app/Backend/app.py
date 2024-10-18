@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 import sqlite3
 from datetime import datetime
+from flask_cors import CORS
+import http.client
 
 app = Flask(__name__)
+CORS(app)
 @app.route('/')
 def home():
     return 'Bem-vindo à API!', 200
@@ -150,7 +153,7 @@ def get_perfil(user_id):
 def signin():
     data = request.get_json()
     email = data.get('email')
-    senha = data.get('senha')
+    senha = data.get('senha1')
 
     conn = sqlite3.connect('meubanco.db')
     cursor = conn.cursor()
@@ -260,7 +263,8 @@ def buscar_morador():
 @app.route('/depositar', methods=['POST'])
 def depositar():
     data = request.get_json()
-    
+
+    morador_id = data.get('morador_id')
     nome = data.get('nome')
     senha = data.get('senha')
    
@@ -270,8 +274,11 @@ def depositar():
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
-        
-        
+
+        #connHttp = http.client.HTTPSConnection("192.168.0.144")
+
+        #connHttp.request("GET", "/")
+
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?)""",
                        (nome, datetime.now(), 'Entregue', data.get('armario_id')))
@@ -293,8 +300,14 @@ def retirar(user_id):
         cursor = conn.cursor()
 
         # Selecionar encomendas do usuário logado
-        cursor.execute("SELECT id, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE id = ?", (user_id,))
+        cursor.execute("SELECT id, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE id = ? and status = 'Entregue'", (user_id,))
         encomendas = cursor.fetchall()
+
+        cursor.execute("UPDATE Tabela_de_Entregas SET status = 'Retirado.' WHERE id = ? and status = 'Entregue'", (user_id,))
+
+        #connHttp = http.client.HTTPSConnection("192.168.0.144")
+
+        #connHttp.request("GET", "/")
 
         # Transformar os resultados em um dicionário
         result = []
@@ -322,4 +335,4 @@ def retirar(user_id):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True) 
+    app.run(host='0.0.0.0', port=5001, debug=False)
