@@ -94,7 +94,6 @@ export default function Depositar() {
         const data = await response.json();
 
         if (response.ok) {
-          navigation.navigate('http://192.168.0.144');
           alert('Coloque o pacote no armário disponível!');
             navigation.navigate('Home');
         } else {

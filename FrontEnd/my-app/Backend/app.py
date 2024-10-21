@@ -276,8 +276,10 @@ def depositar():
         cursor = conn.cursor()
 
         #connHttp = http.client.HTTPSConnection("192.168.0.144")
+        connHttp = http.client.HTTPSConnection("192.168.0.144")
 
         #connHttp.request("GET", "/")
+        connHttp.request("GET", "/")
 
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?)""",
@@ -306,8 +308,10 @@ def retirar(user_id):
         cursor.execute("UPDATE Tabela_de_Entregas SET status = 'Retirado.' WHERE id = ? and status = 'Entregue'", (user_id,))
 
         #connHttp = http.client.HTTPSConnection("192.168.0.144")
+        connHttp = http.client.HTTPSConnection("192.168.0.144")
 
         #connHttp.request("GET", "/")
+        connHttp.request("GET", "/")
 
         # Transformar os resultados em um dicionário
         result = []
