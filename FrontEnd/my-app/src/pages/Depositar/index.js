@@ -5,7 +5,6 @@ import * as Animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TextInput } from 'react-native';
-import URL_API from '../../utils/api-utils'
 
 export default function Depositar() {
   const navigation = useNavigation();
@@ -27,7 +26,7 @@ export default function Depositar() {
     if (!nomeMorador) return;
     setLoading(true);
     try {
-      const response = await fetch(`http://172.17.5.106:5001/buscar_morador?nome=${nomeMorador}`, {
+      const response = await fetch(`http://192.168.0.9:5001/buscar_morador?nome=${nomeMorador}`, {
         method: 'GET'
       });
       if (!response.ok) throw new Error('Erro na rede');
@@ -78,7 +77,7 @@ export default function Depositar() {
     }
     
     try {
-        const response = await fetch('http://172.17.5.106:5001/depositar', {
+        const response = await fetch('http://192.168.0.9:5001/depositar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -92,6 +91,7 @@ export default function Depositar() {
         });
 
         const data = await response.json();
+        console.log(data)
 
         if (response.ok) {
           alert('Coloque o pacote no armário disponível!');

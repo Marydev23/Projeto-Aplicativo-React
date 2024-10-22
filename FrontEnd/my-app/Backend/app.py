@@ -3,6 +3,7 @@ import sqlite3
 from datetime import datetime
 from flask_cors import CORS
 import http.client
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -280,6 +281,8 @@ def depositar():
 
         #connHttp.request("GET", "/")
         connHttp.request("GET", "/")
+        url = "http://192.168.0.144"
+        response = requests.get(url)
 
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?)""",
@@ -312,6 +315,8 @@ def retirar(user_id):
 
         #connHttp.request("GET", "/")
         connHttp.request("GET", "/")
+        url = "http://192.168.0.144"
+        response = requests.get(url)
 
         # Transformar os resultados em um dicionário
         result = []

@@ -24,7 +24,7 @@ export default function Perfil() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const response = await fetch(`http://172.17.5.106:5001/perfil/${user.id}`);
+        const response = await fetch(`http://192.168.0.9:5001/perfil/${user.id}`);
         const data = await response.json();
         
         console.log(data); 

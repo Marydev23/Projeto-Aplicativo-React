@@ -17,7 +17,7 @@ export default function Signin() {
   
     const SigninData = { email, senha1 };
   
-    fetch('http://172.17.5.106:5001/Signin', {
+    fetch('http://192.168.0.9:5001/Signin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

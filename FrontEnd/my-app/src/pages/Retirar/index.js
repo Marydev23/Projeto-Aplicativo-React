@@ -22,7 +22,7 @@ export default function Retirar() {
 
     const fetchEncomendas = async () => {
       try {
-        const response = await fetch(`http://172.17.5.106/Retirar/${usuario.id}`, {
+        const response = await fetch(`http://192.168.0.9/Retirar/${usuario.id}`, {
           method: 'GET'
         });
         const data = await response.json();
@@ -38,7 +38,7 @@ export default function Retirar() {
 
   const retirarEncomenda = async (idEncomenda, armario) => {
     try {
-      const response = await fetch(`http://172.17.5.106:5001/Retirar/${idEncomenda}`, {
+      const response = await fetch(`http://192.168.0.9:5001/Retirar/${idEncomenda}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
