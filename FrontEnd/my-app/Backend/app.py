@@ -275,12 +275,6 @@ def depositar():
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
-
-        #connHttp = http.client.HTTPSConnection("192.168.0.144")
-        connHttp = http.client.HTTPSConnection("192.168.0.144")
-
-        #connHttp.request("GET", "/")
-        connHttp.request("GET", "/")
         url = "http://192.168.0.144"
         response = requests.get(url)
 
@@ -310,11 +304,6 @@ def retirar(user_id):
 
         cursor.execute("UPDATE Tabela_de_Entregas SET status = 'Retirado.' WHERE id = ? and status = 'Entregue'", (user_id,))
 
-        #connHttp = http.client.HTTPSConnection("192.168.0.144")
-        connHttp = http.client.HTTPSConnection("192.168.0.144")
-
-        #connHttp.request("GET", "/")
-        connHttp.request("GET", "/")
         url = "http://192.168.0.144"
         response = requests.get(url)
 
