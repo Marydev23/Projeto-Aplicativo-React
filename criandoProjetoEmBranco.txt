@@ -12,4 +12,7 @@ depois python app.py
 
 
 # Para reiniciar o React Native
-npm start
+npm startnpm start
+
+
+.\venv\Scripts\activate
