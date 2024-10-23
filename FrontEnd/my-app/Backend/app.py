@@ -1,7 +1,9 @@
+
 from flask import Flask, request, jsonify
 import sqlite3
 from flask_cors import CORS
 from datetime import datetime 
+
 
 
 
@@ -45,11 +47,43 @@ def init_db():
     )
     """)
 
-    # Tabela de Entregas
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Moradores (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                sobrenome TEXT NOT NULL,
+                N_ap TEXT NOT NULL,
+                telefone TEXT NOT NULL
+            )
+        ''')
+    
+    cursor.execute(''' 
+            CREATE TABLE IF NOT EXISTS Entregador (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                sobrenome TEXT NOT NULL,
+                N_ap TEXT NOT NULL,
+                telefone TEXT NOT NULL
+            )
+        ''')
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Sindico(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                sobrenome TEXT NOT NULL,
+                N_ap TEXT NOT NULL,
+                telefone TEXT NOT NULL
+            )
+        ''')
+
+
+
+  
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Tabela_de_Entregas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         morador_id INTEGER,
+        nome_completo TEXT,
         data_entrega DATETIME,
         data_retirada DATETIME,
         status TEXT,
@@ -119,24 +153,77 @@ def cadastrar():
             
             print("Conexão com o banco fechada.")
 
+@app.route('/moradores', methods=['GET'])
+def get_moradores():
+    try:
+        conn = sqlite3.connect('meubanco.db', timeout=10)
+        cursor = conn.cursor()
+        
+        
+        cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'morador'")
+        moradores = cursor.fetchall()
+        
+        resultado = [{'id': morador[0], 'nome': morador[1], 'sobrenome': morador[2], 'N_ap': morador[3], 'telefone': morador[4]} for morador in moradores]
+        return jsonify(resultado), 200
 
-from flask import Flask, jsonify
-import sqlite3
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Erro no banco de dados: {str(e)}'}), 500
+    finally:
+        if conn:
+            conn.close()
 
-app = Flask(__name__)
+@app.route('/porteiros', methods=['GET'])
+def get_porteiros():
+    try:
+        conn = sqlite3.connect('meubanco.db', timeout=10)
+        cursor = conn.cursor()
+        
+        
+        cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'porteiro'")
+        porteiros = cursor.fetchall()
+        
+        resultado = [{'id': porteiro[0], 'nome': porteiro[1], 'sobrenome': porteiro[2], 'N_ap': porteiro[3], 'telefone': porteiro[4]} for porteiro in porteiros]
+        return jsonify(resultado), 200
 
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Erro no banco de dados: {str(e)}'}), 500
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/sindicos', methods=['GET'])
+def get_sindicos():
+    try:
+        conn = sqlite3.connect('meubanco.db', timeout=10)
+        cursor = conn.cursor()
+        
+       
+        cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'sindico'")
+        sindicos = cursor.fetchall()
+        
+        resultado = [{'id': sindico[0], 'nome': sindico[1], 'sobrenome': sindico[2], 'N_ap': sindico[3], 'telefone': sindico[4]} for sindico in sindicos]
+        return jsonify(resultado), 200
+
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Erro no banco de dados: {str(e)}'}), 500
+    finally:
+        if conn:
+            conn.close()
+
+            
 @app.route('/perfil/<int:user_id>', methods=['GET'])
 def get_perfil(user_id):
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
-        # Buscar o usuário no banco de dados
+        
         cursor.execute("""
-            SELECT nome, sobrenome, telefone, rua, N_ap, numero, bairro, cidade, estado 
-            FROM Cadastro 
-            WHERE id=?
+            SELECT id, armario_id, data_entrega, status 
+            FROM Tabela_de_Entregas 
+            WHERE morador_id = ?
         """, (user_id,))
+
         user_data = cursor.fetchone()
 
         if user_data:
@@ -156,8 +243,6 @@ def get_perfil(user_id):
         if conn:
             conn.close()
 
-
-
             
 @app.route('/Signin', methods=['POST'])
 def signin():
@@ -165,20 +250,36 @@ def signin():
     email = data.get('email')
     senha = data.get('senha1')
 
-    
-
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
        
-        cursor.execute("SELECT id, nome FROM Cadastro WHERE email = ? AND senha1 = ?", (email, senha))
+        cursor.execute("""
+            SELECT id, nome, sobrenome, cpf, telefone, 
+                   cep, rua, N_ap, numero, bairro, cidade, estado 
+            FROM Cadastro 
+            WHERE email = ? AND senha1 = ?
+        """, (email, senha))
         user = cursor.fetchone()
 
         if user:
             user_id = user[0]  
             nome = user[1]  
-            return jsonify({'message': f'Login bem-sucedido, bem-vindo {nome}', 'userId': user_id}), 200
+            sobrenome = user[2]  
+            telefone = user[4]  
+            
+            endereco = f"{user[5]} {user[6]}, {user[7]} {user[8]}, {user[9]}, {user[10]}, {user[11]}"
+
+            return jsonify({
+                'user': {
+                    'id': user_id,
+                    'nome': nome,
+                    'sobrenome': sobrenome,
+                    'telefone': telefone,
+                    'endereco': endereco  
+                }
+            }), 200
         else:
             return jsonify({'error': 'Credenciais inválidas'}), 401
 
@@ -191,7 +292,7 @@ def signin():
             conn.close()
 
 
-@app.route('/Armarios', methods=['POST'])
+@app.route('/Armario', methods=['POST'])
 def criar_armario():
     data = request.get_json()
     numero_armario = data.get('numero_armario')
@@ -204,38 +305,22 @@ def criar_armario():
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
         
-        cursor.execute("SELECT numero_armario FROM Armario WHERE numero_armario IN (1, 2)")
-        armarios_existentes = cursor.fetchall()
-
-        if 1 not in [armario[0] for armario in armarios_existentes]:
-            cursor.execute("""
-                INSERT INTO Armario (numero_armario, status)
-                VALUES (1, 'disponível')
-            """)
-
-        if 2 not in [armario[0] for armario in armarios_existentes]:
-            cursor.execute("""
-                INSERT INTO Armario (numero_armario, status)
-                VALUES (2, 'disponível')
-            """)
-
         
-        cursor.execute("""
-            INSERT INTO Armario (numero_armario, status)
-            VALUES (?, ?)
-        """, (numero_armario, status))
+        cursor.execute("SELECT COUNT(*) FROM Armario WHERE numero_armario = ?", (numero_armario,))
+        existe = cursor.fetchone()[0]
 
+        if existe:
+            return jsonify({'message': 'Número de armário já existe.'}), 409
+
+        cursor.execute("INSERT INTO Armario (numero_armario, status) VALUES (?, ?)", (numero_armario, status))
         conn.commit()
+
         return jsonify({'message': 'Armário criado com sucesso.'}), 201
-    except sqlite3.IntegrityError:
-        return jsonify({'message': 'Número de armário já existe.'}), 409
     except sqlite3.Error as e:
         return jsonify({'error': f"Erro ao criar armário: {e}"}), 500
     finally:
-        conn.close()
-
-
-
+        if conn:
+            conn.close()
 
 @app.route('/buscar_morador', methods=['GET'])
 def buscar_morador():
@@ -248,18 +333,21 @@ def buscar_morador():
     sobrenome = ' '.join(partes_nome[1:]) if len(partes_nome) > 1 else ''
 
     try:
-        conn = sqlite3.connect('meubanco.db')
+        conn = sqlite3.connect('meubanco.db', timeout=10)
         cursor = conn.cursor()
 
+        
+        print(f'Buscando morador: Nome: {nome}, Sobrenome: {sobrenome}')
+
         if sobrenome:
-            cursor.execute("SELECT id, nome, sobrenome, N_ap FROM Cadastro WHERE nome=? AND sobrenome LIKE ?", (nome, f'%{sobrenome}%'))
+            cursor.execute("SELECT id, nome, sobrenome, N_ap FROM Cadastro WHERE LOWER(nome)=? AND LOWER(sobrenome) LIKE ?", (nome.lower(), f'%{sobrenome.lower()}%'))
         else:
-            cursor.execute("SELECT id, nome, sobrenome, N_ap FROM Cadastro WHERE nome=?", (nome,))
+            cursor.execute("SELECT id, nome, sobrenome, N_ap FROM Cadastro WHERE LOWER(nome)=?", (nome.lower(),))
 
         moradores = cursor.fetchall()
 
         if not moradores:
-            return jsonify({'message': 'Morador não encontrado'}), 404
+            return jsonify({'message': 'Morador não encontrado', 'buscado': {'nome': nome, 'sobrenome': sobrenome}}), 404
 
         resultado = [{'id': morador[0], 'nome': morador[1], 'sobrenome': morador[2], 'N_ap': morador[3]} for morador in moradores]
         return jsonify(resultado), 200
@@ -277,64 +365,158 @@ def buscar_morador():
 def depositar():
     data = request.get_json()
     
-    nome = data.get('nome')
+    morador_id = data.get('morador_id')  
+    nome_completo = data.get('nome_completo')  
     senha = data.get('senha')
-   
-    if not nome or not senha:
-        return jsonify({'message': 'Morador ID e senha são obrigatórios.'}), 400
+    armario_id = data.get('armario_id')
+
+    if not morador_id or not senha or not nome_completo or not armario_id:
+        return jsonify({'message': 'Morador ID, nome completo, senha e armário ID são obrigatórios.'}), 400
 
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
+
+        cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, nome_completo, data_entrega, status, armario_id)
+                          VALUES (?, ?, ?, ?, ?)""",
+                       (morador_id, nome_completo, datetime.now().isoformat(), 'A retirar', armario_id))
+        conn.commit()
+
         
         
-        cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, data_entrega, status, armario_id)
-                          VALUES (?, ?, ?, ?)""",
-                       (nome, datetime.now(), 'Entregue', data.get('armario_id')))
         conn.commit()
         
-        return jsonify({'message': 'Entregue.'}), 201
+        return jsonify({'message': 'Entrega registrada com sucesso.'}), 201
     except sqlite3.Error as e:
+        print(f"Erro ao registrar entrega: {e}") 
         return jsonify({'message': f'Erro ao registrar entrega: {e}'}), 500
     finally:
         if conn:
             conn.close()
 
 
-
-@app.route('/Retirar/<int:user_id>', methods=['GET'])
-def retirar(user_id):
+@app.route('/entregar/<int:morador_id>', methods=['GET'])
+def entregar(morador_id):
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
-        # Selecionar encomendas do usuário logado
-        cursor.execute("SELECT id, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE id = ?", (user_id,))
-        encomendas = cursor.fetchall()
+        cursor.execute("SELECT id, nome_completo, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE morador_id = ?", (morador_id,))
+        entregas = cursor.fetchall()
 
-        # Transformar os resultados em um dicionário
         result = []
-        for encomenda in encomendas:
+        for entrega in entregas:
             result.append({
-                'id': encomenda[0],
-                'armario_id': encomenda[1],
-                'data_entrega': encomenda[2],
-                'status': encomenda[3],
+                'id': entrega[0],
+                'nome_completo': entrega[1],
+                'armario_id': entrega[2],
+                'data_entrega': entrega[3],
+                'status': entrega[4],
             })
 
         return jsonify(result), 200
 
     except sqlite3.Error as e:
-        print(f"Erro ao buscar encomendas: {e}")
-        return jsonify({'error': 'Erro ao buscar encomendas'}), 500
+        print(f"Erro ao buscar entregas: {e}")
+        return jsonify({'error': 'Erro ao buscar entregas'}), 500
 
     finally:
         if conn:
             conn.close()
 
 
+@app.route('/entregar/<int:entrega_id>', methods=['PUT'])
+def atualizar_entrega(entrega_id):
+    try:
+        conn = sqlite3.connect('meubanco.db')
+        cursor = conn.cursor()
+
+        data = request.json
+        novo_status = data.get('status')
+        armario_id = data.get('armario_id')  
+        data_retirada = datetime.now().strftime('%d/%m/%Y %I:%M:%S %p')
+
+      
+        cursor.execute("""UPDATE Tabela_de_Entregas 
+                          SET status = ?, data_retirada = ? 
+                          WHERE id = ?""", 
+                       (novo_status, data_retirada, entrega_id))
+
+        
+        conn.commit()
+
+        return jsonify({'message': 'Entrega atualizada e armário liberado com sucesso.'}), 200
+
+    except sqlite3.Error as e:
+        print(f"Erro ao atualizar entrega: {e}")
+        return jsonify({'error': 'Erro ao atualizar entrega'}), 500
+
+    finally:
+        if conn:
+            conn.close()
 
 
+            
+
+@app.route('/minhas-entregas/<int:user_id>', methods=['GET'])
+def minhas_entregas(user_id):
+    try:
+        conn = sqlite3.connect('meubanco.db')
+        cursor = conn.cursor()
+        
+       
+        cursor.execute("SELECT * FROM Tabela_de_Entregas WHERE id_usuario = ?", (user_id,))
+        entregas = cursor.fetchall()
+
+       
+        if not entregas:
+            return jsonify([]), 200
+
+        result = []
+        for entrega in entregas:
+            result.append({
+                'id': entrega[0],           
+                'nome_completo': entrega[1],
+                'data_entrega': entrega[2],
+                'armario_id': entrega[3],
+                'status': entrega[4],
+            })
+
+        return jsonify(result), 200
+
+    except sqlite3.Error as e:
+        print(f"Erro ao buscar entregas: {e}")
+        return jsonify({'error': 'Erro ao buscar entregas', 'message': str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+
+    try:
+        conn = sqlite3.connect('meubanco.db')
+        cursor = conn.cursor()
+
+        data = request.json
+        novo_status = data.get('status')
+        data_retirada = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Formato da data
+
+        cursor.execute("""
+            UPDATE Tabela_de_Entregas 
+            SET status = ?, data_retirada = ? 
+            WHERE id = ?
+        """, (novo_status, data_retirada, entrega_id))
+        conn.commit()
+
+        return jsonify({'message': 'Status atualizado com sucesso', 'data_retirada': data_retirada}), 200
+
+    except sqlite3.Error as e:
+        print(f"Erro ao atualizar entrega: {e}")
+        return jsonify({'error': 'Erro ao atualizar entrega'}), 500
+
+    finally:
+        if conn:
+            conn.close()
 
 
 if __name__ == '__main__':

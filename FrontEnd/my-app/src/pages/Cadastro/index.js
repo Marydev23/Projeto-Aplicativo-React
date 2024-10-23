@@ -48,7 +48,7 @@ export default function Cadastro() {
  
     console.log('Dados a serem enviados:', data); 
 
-    fetch('http://192.168.0.06:5001/cadastro', {
+    fetch('http://192.168.0.10:5001/cadastro', {
       
       method: 'POST',
       headers: {
