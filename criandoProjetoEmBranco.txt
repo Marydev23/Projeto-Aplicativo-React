@@ -3,7 +3,6 @@ aplicativo rodar
 PS C:\Users\user\Desktop\Front-End\
 ProgramacaoDispositivosMoveisEmAndroid\FrontEnd\my-app\Backend> 
 
-.\venv\Scripts\activate
 
 Voltar atras cd ..\..\
   //const userId = 4; //buscar um morador
@@ -13,3 +12,26 @@ depois python app.py
 
 # Para reiniciar o React Native
 npm start
+
+
+
+
+Passo git
+
+touch .gitignore
+git rm --cached my-app
+rm -rf my-app/.git
+git add my-app/
+git status
+git commit -m "pasta my-app"
+git push origin main
+
+
+Para celular npx expo start --tunnel
+
+mpm -i
+
+
+
+
+.\venv\Scripts\activate
