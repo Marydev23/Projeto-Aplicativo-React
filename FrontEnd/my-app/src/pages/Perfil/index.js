@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import axios from 'axios';
+import { URL_API } from '../../utils/api-utils';
 
 const ProfileScreen = () => {
   const { userData, setUserData } = useUser();
@@ -16,7 +17,7 @@ const ProfileScreen = () => {
 
   const handleSave = async () => {
     try {
-      await axios.put('http://192.168.0.10:5001/perfil', editableData);
+      await axios.put(URL_API + '/perfil', editableData);
       setUserData(editableData);
       setIsEditing(false);
     } catch (error) {

@@ -1,7 +1,7 @@
 // Condominio.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Button, Alert } from 'react-native';
-
+import { URL_API } from '../../utils/api-utils';
 const Condominio = () => {
   const [moradores, setMoradores] = useState([]);
   const [porteiros, setPorteiros] = useState([]);
@@ -12,11 +12,11 @@ const Condominio = () => {
     try {
       let url;
       if (tipo === 'moradores') {
-        url = 'http://192.168.0.10:5001/moradores';
+        url = URL_API + '/moradores';
       } else if (tipo === 'porteiros') {
-        url = 'http://192.168.0.10:5001/porteiros';
+        url = URL_API + '/porteiros';
       } else if (tipo === 'sindicos') {
-        url = 'http://192.168.0.10:5001/sindicos';
+        url = URL_API + '/sindicos';
       }
 
       const response = await fetch(url);

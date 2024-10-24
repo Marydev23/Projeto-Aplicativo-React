@@ -4,6 +4,7 @@ import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useUser } from '../../contexts/UserContext';
+import { URL_API } from '../../utils/api-utils';
 
 export default function Signin() {
   const navigation = useNavigation();
@@ -19,7 +20,7 @@ export default function Signin() {
   
     const SigninData = { email, senha1 };
   
-    fetch('http://192.168.0.10:5001/Signin', {
+    fetch(URL_API + '/Signin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useUser } from '../../contexts/UserContext';
 import axios from 'axios';
+import { URL_API } from '../../utils/api-utils';
 
 const EntregarScreen = () => {
   const { userData } = useUser(); 
@@ -11,7 +12,7 @@ const EntregarScreen = () => {
     const fetchEntregas = async () => {
       if (userData && userData.id) {
         try {
-          const response = await axios.get(`http://192.168.0.10:5001/entregar/${userData.id}`); 
+          const response = await axios.get(URL_API + `/entregar/${userData.id}`); 
           setEntregas(response.data);
         } catch (error) {
           console.error(error);
@@ -27,7 +28,7 @@ const EntregarScreen = () => {
       const data_retirada = new Date().toISOString(); 
 
       
-      await axios.put(`http://192.168.0.10:5001/entregar/${entregaId}`, { 
+      await axios.put(URL_API + `/entregar/${entregaId}`, { 
         status: 'Retirado', 
         data_retirada: data_retirada 
       });
