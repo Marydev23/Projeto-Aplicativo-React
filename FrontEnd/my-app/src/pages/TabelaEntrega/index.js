@@ -1,80 +1,104 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import URL_API from '../../utils/api-utils'
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useUser } from '../../contexts/UserContext';
+import axios from 'axios';
 
-export default function TabelaEntregas() {
-  const navigation = useNavigation();
+const EntregarScreen = () => {
+  const { userData } = useUser(); 
   const [entregas, setEntregas] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Função para buscar as entregas do backend
-    fetch(URL_API + '/entregas')
-      .then((response) => response.json())
-      .then((data) => {
-        setEntregas(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Erro ao buscar as entregas:', error);
-        setLoading(false);
+    const fetchEntregas = async () => {
+      if (userData && userData.id) {
+        try {
+          const response = await axios.get(`http://192.168.0.10:5001/entregar/${userData.id}`); 
+          setEntregas(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    fetchEntregas();
+  }, [userData]);
+
+  const handleRetirar = async (entregaId) => {
+    try {
+      const data_retirada = new Date().toISOString(); 
+
+      
+      await axios.put(`http://192.168.0.10:5001/entregar/${entregaId}`, { 
+        status: 'Retirado', 
+        data_retirada: data_retirada 
       });
-  }, []);
+      
+     
+      setEntregas(prevEntregas => 
+        prevEntregas.map(entrega => 
+          entrega.id === entregaId ? { ...entrega, status: 'Retirado', data_retirada: data_retirada } : entrega
+        )
+      );
 
-  if (loading) {
-    return <Text>Carregando entregas...</Text>;
-  }
+      Alert.alert('Retira seu pacote.');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível atualizar o status da entrega.');
+    }
+  };
 
-  if (entregas.length === 0) {
-    return <Text>Nenhuma entrega encontrada</Text>;
-  }
+  const renderEntregaItem = ({ item }) => (
+    <View style={styles.entregaItem}>
+      <Text>Nome: {item.nome_completo}</Text>
+      <Text>Data de Entrega: {item.data_entrega}</Text>
+      <Text>Armário: {item.armario_id}</Text>
+      <Text>Status: {item.status}</Text>
+      {item.status !== 'Retirado' && ( 
+        <TouchableOpacity style={styles.button} onPress={() => handleRetirar(item.id)}>
+          <Text style={styles.buttonText}>Retirar</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tabela de Entregas</Text>
+      <Text style={styles.title}>Minhas Entregas</Text>
       <FlatList
         data={entregas}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.text}>ID da Entrega: {item.id}</Text>
-            <Text style={styles.text}>Data de Entrega: {item.data_entrega}</Text>
-            <Text style={styles.text}>Data de Retirada: {item.data_retirada}</Text>
-            <Text style={styles.text}>Status: {item.status}</Text>
-            <Text style={styles.text}>ID do Armário: {item.armario_id}</Text>
-          </View>
-        )}
+        keyExtractor={(item) => item.id.toString()} 
+        renderItem={renderEntregaItem}
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
+  entregaItem: {
     padding: 15,
-    marginBottom: 15,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
   },
-  text: {
-    fontSize: 16,
-    marginBottom: 5,
+  button: {
+    marginTop: 10,
+    backgroundColor: '#006400', 
+    padding: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff', 
+    fontWeight: 'bold',
   },
 });
+
+export default EntregarScreen;

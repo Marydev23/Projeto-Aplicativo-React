@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import URL_API from '../../utils/api-utils'
 
 export default function Cadastro() {
   const navigation = useNavigation();
@@ -49,7 +48,7 @@ export default function Cadastro() {
  
     console.log('Dados a serem enviados:', data); 
 
-    fetch(URL_API + '/cadastro', {
+    fetch('http://192.168.0.10:5001/cadastro', {
       
       method: 'POST',
       headers: {

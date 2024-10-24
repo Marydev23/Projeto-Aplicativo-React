@@ -1,187 +1,106 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useUser } from '../../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-export default function Retirar() {
-  const navigation = useNavigation();
-  const [encomendas, setEncomendas] = useState([]);
-  const getData = async (titulo) => {
-    try {
-      const jsonValue = await AsyncStorage.getItem(titulo);
-      setUsuario(JSON.parse(jsonValue));
-    } catch (e) {
-      // error reading value
-      console.error(e);
-    }
-  };
+import axios from 'axios';
 
-  const [usuario, setUsuario] = useState({})
+const EntregarScreen = () => {
+  const navigation = useNavigation();
+  const { userData } = useUser(); 
+  const [entregas, setEntregas] = useState([]);
 
   useEffect(() => {
-    getData("usuario"); 
-
-    const fetchEncomendas = async () => {
-      try {
-        const response = await fetch(`http://192.168.0.9/Retirar/${usuario.id}`, {
-          method: 'GET'
-        });
-        const data = await response.json();
-        setEncomendas(data);
-      } catch (error) {
-        console.error('Erro ao buscar encomendas:', error);
+    const fetchEntregas = async () => {
+      if (userData && userData.id) {
+        try {
+          const response = await axios.get(`http://192.168.0.10:5001/entregar/${userData.id}`); 
+          setEntregas(response.data);
+        } catch (error) {
+          console.error(error);
+        }
       }
     };
 
-    fetchEncomendas();
+    fetchEntregas();
+  }, [userData]);
 
-  }, [usuario.id]); // Dependência do userId
-
-  const retirarEncomenda = async (idEncomenda, armario) => {
+  const handleRetirar = async (entregaId) => {
     try {
-      const response = await fetch(`http://192.168.0.9:5001/Retirar/${idEncomenda}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+     
+      await axios.put(`http://192.168.0.10:5001/entregar/${entregaId}`, { 
+        status: 'Retirado', 
+        data_retirada: new Date().toISOString() 
       });
+      
+     
+      setEntregas(prevEntregas => 
+        prevEntregas.filter(entrega => entrega.id !== entregaId)
+      );
 
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert(`Encomenda retirada do armário ${armario}`);
-        setEncomendas(encomendas.filter((encomenda) => encomenda.id !== idEncomenda));
-      } else {
-        Alert.alert('Erro', data.message || 'Erro ao retirar encomenda');
-      }
+      Alert.alert('Retira seu pacote.');
     } catch (error) {
-      console.error('Erro ao retirar encomenda:', error);
-      Alert.alert('Erro ao retirar encomenda');
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível atualizar o status da entrega.');
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Suas Encomendas</Text>
-      </View>
-
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerText}>Armário</Text>
-        <Text style={styles.headerText}>Data</Text>
-        <Text style={styles.headerText}>Status</Text>
-      </View>
-
-      {encomendas.length > 0 ? (
-        encomendas.map((encomenda) => (
-          <View key={encomenda.id} style={styles.tableRow}>
-            <Text style={styles.rowText}>{encomenda.armario}</Text>
-            <Text style={styles.rowText}>{encomenda.data}</Text>
-            <View style={styles.statusContainer}>
-              <Text style={styles.rowText}>{encomenda.status}</Text>
-              {encomenda.status === 'Entregue' && (
-                <TouchableOpacity
-                  style={styles.buttonRetirar}
-                  onPress={() => retirarEncomenda(encomenda.id, encomenda.armario)}
-                >
-                  <Text style={styles.buttonText}>Retirar</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.noEncomendas}>Nenhuma encomenda disponível.</Text>
-      )}
-
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={styles.backButtonText}>Voltar ao início</Text>
+  const renderEntregaItem = ({ item }) => (
+    <View style={styles.entregaItem}>
+      <Text>Nome: {item.nome_completo}</Text>
+      <Text>Data de Entrega: {item.data_entrega}</Text>
+      <Text>Armário: {item.armario_id}</Text>
+      <Text>Status: {item.status}</Text>
+      <TouchableOpacity style={styles.button} onPress={() => handleRetirar(item.id)}>
+        <Text style={styles.buttonText}>Retirar</Text>
       </TouchableOpacity>
     </View>
   );
-}
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title } >Retire seu pacote</Text>
+      <FlatList
+        data={entregas.filter(entrega => entrega.status !== 'Retirado')} 
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderEntregaItem}
+      />
+
+      <TouchableOpacity style={styles.button}onPress={() => {navigation.navigate('Home'); }}>
+        <Text style={styles.buttonText}>Sair</Text>
+      </TouchableOpacity>
+    </View>
+
+    //onPress={() => navigation.navigate('Home');
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#D3D3D3',
     padding: 20,
-    justifyContent: 'center', 
-  },
-  header: {
-    alignItems: 'center', 
-    marginBottom: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
+    marginBottom: 20,
   },
-  noEncomendas: {
-    fontSize: 16,
-    color: '#000',
-    textAlign: 'center',
-    marginTop: 20,
+  entregaItem: {
+    padding: 15,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
   },
-  backButton: {
-    marginTop: 30,
-    padding: 12,
+  button: {
+    marginTop: 10,
     backgroundColor: '#006400',
-    borderRadius: 10,
+    padding: 10,
     alignItems: 'center',
-  },
-  backButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 12,
-    paddingHorizontal: 10,
-  },
-  headerText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-    flex: 1,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 10,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  rowText: {
-    fontSize: 14,
-    color: '#000',
-    textAlign: 'center',
-    flex: 1,
-  },
-  statusContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  buttonRetirar: {
-    marginTop: 5,
-    backgroundColor: '#006400',
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: '#fff', 
     fontWeight: 'bold',
-    fontSize: 14,
   },
 });
+
+export default EntregarScreen;

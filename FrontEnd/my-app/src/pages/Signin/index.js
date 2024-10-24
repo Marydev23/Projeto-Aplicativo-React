@@ -1,11 +1,13 @@
- import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../../contexts/UserContext';
 
 export default function Signin() {
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
+  const { setUserData } = useUser(); 
   const [email, setEmail] = useState('');
   const [senha1, setSenha] = useState('');
 
@@ -17,7 +19,7 @@ export default function Signin() {
   
     const SigninData = { email, senha1 };
   
-    fetch('http://192.168.0.9:5001/Signin', {
+    fetch('http://192.168.0.10:5001/Signin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,51 +30,33 @@ export default function Signin() {
         if (!response.ok) {
           throw new Error('Credenciais inválidas');
         }
-        return response.json(); 
+        return response.json();
       })
       .then(result => {
         console.log('Resultado da API:', result);
   
-        if (result) {
-          Alert.alert(result.message);
-         
-          navigation.navigate('Perfil', { user: result.user });
+        if (result.user) {
+         // Alert.alert(result.message);
+           
+          setUserData(result.user); 
+  
+      
+          navigation.navigate('MainTabs', { screen: 'Home' }); 
         } else {
-          console.error('Erro: userId não encontrado no resultado:', result);
+          console.error('Erro: user não encontrado no resultado:', result);
         }
   
-        setEmail(''); 
+       
+        setEmail('');
         setSenha('');
-
-        navigation.navigate('MainTabs', { screen: 'Home' });
       })
-
-
-      
       .catch(error => {
         Alert.alert('Erro', error.message);
       });
   };
-  const storeData = async (value, titulo) => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      await AsyncStorage.setItem(titulo, jsonValue);
-    } catch (e) {
-      // saving error
-      console.error(e);
-    }
-  };
-
   
-  const getData = async (titulo) => {
-    try {
-      const jsonValue = await AsyncStorage.getItem(titulo);
-      setUsuario(JSON.parse(jsonValue));
-    } catch (e) {
-      // error reading value
-      console.error(e);
-    }
-  };
+  
+  
 
   return (
     <View style={styles.container}>
@@ -86,19 +70,19 @@ export default function Signin() {
           placeholder="Digite seu email..."
           style={styles.input}
           value={email}
-          onChangeText={setEmail} 
+          onChangeText={setEmail}
         />
 
-        <Text style={styles.title}>Senha</Text> 
+        <Text style={styles.title}>Senha</Text>
         <TextInput
           placeholder="Digite sua senha..."
           style={styles.input}
           secureTextEntry={true}
-          value={senha1} 
-          onChangeText={setSenha} 
+          value={senha1}
+          onChangeText={setSenha}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleSignin}> 
+        <TouchableOpacity style={styles.button} onPress={handleSignin}>
           <Text style={styles.buttonText}>Acessar</Text>
         </TouchableOpacity>
 
@@ -126,7 +110,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 28,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
     color: '#000',
   },
   containerform: {
@@ -157,7 +141,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: "#fff", 
+    color: "#fff",
     fontSize: 18,
     fontWeight: 'bold'
   },
@@ -178,6 +162,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   }
 });
-
-
-  

@@ -40,7 +40,7 @@ export default function Home() {
           <Text style={styles.messageTextDR}>Minhas Entregas</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('ADM')}>    
+        <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Condominio')}>    
           <Text style={styles.messageTextDR}>Condomínio</Text>
         </TouchableOpacity>
       </View>

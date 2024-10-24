@@ -26,25 +26,35 @@ export default function Depositar() {
     if (!nomeMorador) return;
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.0.9:5001/buscar_morador?nome=${nomeMorador}`, {
+      const response = await fetch(`http://192.168.0.10:5001/buscar_morador?nome=${nomeMorador}`, {
         method: 'GET'
       });
       if (!response.ok) throw new Error('Erro na rede');
+  
       const data = await response.json();
-      setIdMorador(data[0].id)
-      setTodosMoradores(data);
+      console.log(data); 
+      if (data.length > 0) {
+        setIdMorador(data[0].id);
+        setTodosMoradores(data);
+      } else {
+        alert('Nenhum morador encontrado.');
+      }
     } catch (error) {
-      console.error('Erro ao buscar moradores:', error);
-      alert('Erro ao buscar moradores. Verifique a conexão.');
-    } finally {
+       // saiiuuuuuuu
+       //console.error(error);
+      } finally {
+        setLoading(false); //para
+    
+    
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    buscarMoradores();
+    if (nomeMorador.length > 2) {  
+      buscarMoradores();
+    }
   }, [nomeMorador]);
-
   useEffect(() => {
     if (nomeMorador.length > 0) {
       const filtered = todosMoradores.filter((morador) =>
@@ -55,55 +65,54 @@ export default function Depositar() {
       setSugestoes([]);
     }
   }, [nomeMorador, todosMoradores]);
+
   const selecionarMorador = (morador) => {
-    
     setNomeMorador(`${morador.nome} ${morador.sobrenome}`);
     setIdMorador(morador.id);
     setEntregaId(morador.id);
-   
     setSugestoes([]);
-    console.log(`Morador selecionado: ${morador.nome} ${morador.sobrenome}`); // Para debug
+    
+    console.log(`Morador selecionado: ${morador.nome} ${morador.sobrenome}`); 
+    
   };
-  
+
 
   const depositarEntrega = async () => {
     if (!entregaId) {
-        alert('Por favor, selecione um morador para depositar.');
-        return;
+      alert('Por favor, selecione um morador para depositar.');
+      return;
     }
     if (!senha) {
-        alert('Por favor, digite a senha.');
-        return;
+      alert('Por favor, digite a senha.');
+      return;
     }
-    
+  
     try {
-        const response = await fetch('http://192.168.0.9:5001/depositar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                morador_id: todosMoradores[0].id,
-                senha: senha,
-                nome: nomeMorador.split(" ")[0],          // Capturing the first name
-                sobrenome: nomeMorador.split(" ")[1],     // Capturing the last name
-                N_ap: 'Apartamento do Morador', // Captura o apartamento
-                armario_id: selectedButton === 'pequena' ? 1 : 2 // Exemplo: 1 para pequena, 2 para média
-            }),
-        });
-
-        const data = await response.json();
-        console.log(data)
-
-        if (response.ok) {
-          alert('Coloque o pacote no armário disponível!');
-            navigation.navigate('Home');
-        } else {
-            alert(data.message || 'Erro ao registrar entrega');
-        }
+      const response = await fetch('http://192.168.0.10:5001/depositar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          morador_id: idMorador,
+          senha: senha,
+          nome_completo: nomeMorador, 
+          N_ap: 'Ap',
+          armario_id: selectedButton === 'pequena' ? 1 : 2 
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert('Coloque o pacote no armário disponível!');
+        navigation.navigate('Home');
+      } else {
+        alert(data.message || 'Erro ao registrar entrega');
+      }
     } catch (error) {
-        console.error('Erro ao depositar entrega:', error);
+      console.error('Erro ao depositar entrega:', error);
     }
-};
-
+  };
+  
   return (
     <View style={styles.container}>
       <Animatable.View>
@@ -155,12 +164,12 @@ export default function Depositar() {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                style={styles.sugestaoItem}
-            onPress={() => selecionarMorador(item)}
+                  style={styles.sugestaoItem}
+                  onPress={() => selecionarMorador(item)}
                 >
-                    <Text style={styles.listItemText}>
-              {item.nome.toUpperCase()} {item.sobrenome.toUpperCase()} apartamento {item.N_ap} 
-            </Text> 
+                  <Text style={styles.listItemText}>
+                    {item.nome.toUpperCase()} {item.sobrenome.toUpperCase()} Ap {item.N_ap}
+                  </Text> 
                 </TouchableOpacity>
               )}
               style={styles.sugestoesContainer}
@@ -256,8 +265,6 @@ const styles = StyleSheet.create({
     padding: 30,
   },
   sugestaoItem: {
-    //padding: -50,
-    //borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
   listItemText: {
@@ -288,7 +295,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonAbrir: {
-    backgroundColor: '#32CD32',
+    backgroundColor: '#006400',
     borderRadius: 5,
     paddingVertical: 15,
     width: '100%',

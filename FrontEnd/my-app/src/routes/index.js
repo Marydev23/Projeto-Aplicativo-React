@@ -5,6 +5,7 @@ import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import { Entypo, Feather } from '@expo/vector-icons';
 
 
+
 import Welcome from '../pages/Welcome';
 import Signin from '../pages/Signin';
 import Home from '../pages/Home';
@@ -15,6 +16,8 @@ import Perfil from '../pages/Perfil';
 import TabelaEntrega from '../pages/TabelaEntrega';
 import Notificacao from'../pages/Notificacao';
 import Config from'../pages/Config';
+import Condominio  from '../pages/Condominio';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -64,6 +67,12 @@ function StackRoutes() {
         component={TabelaEntrega}
         options={{ headerShown: false }}
       />
+
+      <Stack.Screen
+        name="Condominio"
+        component={Condominio}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -105,6 +114,7 @@ function TabRoutes() {
             ),
           }} 
           />
+       
 
         <Tab.Screen
         name="Config"
@@ -127,6 +137,8 @@ function TabRoutes() {
             tabBarIcon: ({ size, color }) => (
               <Feather name="user"  size={24} color="#fff"  />
             ),
+
+            
           }} 
         />
 
