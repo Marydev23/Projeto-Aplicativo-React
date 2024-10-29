@@ -94,7 +94,7 @@ def init_db():
 
 init_db()
 
-
+#aqui tem atualizações
 @app.route('/cadastro', methods=['POST'])
 def cadastrar():
     data = request.get_json()
@@ -135,6 +135,37 @@ def cadastrar():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (nome, sobrenome, cpf, email, telefone, cep, rua, N_ap, numero, bairro, cidade, estado, senha1, tipo_usuario))
         conn.commit()
+
+      #Adiciona o tipo de usuario (morador) na tabela Moradores
+      
+        if tipo_usuario == 'morador':
+            cursor.execute("""
+                INSERT INTO Moradores (nome, sobrenome,N_ap, telefone)
+                VALUES (?, ?,?, ?)
+            """, (nome, sobrenome, N_ap, telefone))
+            conn.commit()
+
+        #Adiciona o tipo de usuario (porteiro) na tabela Entregado
+
+        if tipo_usuario == 'porteiro':
+            cursor.execute("""
+                INSERT INTO Entregador (nome, sobrenome,N_ap, telefone)
+                VALUES (?, ?,?, ?)
+            """, (nome, sobrenome, N_ap, telefone))
+            conn.commit()
+
+
+
+         #Adiciona o tipo de usuario (sindico) na tabela sindico
+
+        if tipo_usuario == 'sindico':
+            cursor.execute("""
+                INSERT INTO sindico (nome, sobrenome,N_ap, telefone)
+                VALUES (?, ?,?, ?)
+            """, (nome, sobrenome, N_ap, telefone))
+            conn.commit()
+
+
         print("Dados inseridos com sucesso.")
         return jsonify({'message': 'Dados cadastrados com sucesso.'}), 201
     except sqlite3.IntegrityError:
@@ -148,6 +179,8 @@ def cadastrar():
             conn.close()
             
             print("Conexão com o banco fechada.")
+
+#buscando moradores
 
 @app.route('/moradores', methods=['GET'])
 def get_moradores():
@@ -168,6 +201,8 @@ def get_moradores():
         if conn:
             conn.close()
 
+#buscando porteiros
+
 @app.route('/porteiros', methods=['GET'])
 def get_porteiros():
     try:
@@ -176,9 +211,9 @@ def get_porteiros():
         
         
         cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'porteiro'")
-        porteiros = cursor.fetchall()
+        moradores = cursor.fetchall()
         
-        resultado = [{'id': porteiro[0], 'nome': porteiro[1], 'sobrenome': porteiro[2], 'N_ap': porteiro[3], 'telefone': porteiro[4]} for porteiro in porteiros]
+        resultado = [{'id': morador[0], 'nome': morador[1], 'sobrenome': morador[2], 'N_ap': morador[3], 'telefone': morador[4]} for morador in moradores]
         return jsonify(resultado), 200
 
     except sqlite3.Error as e:
@@ -187,6 +222,9 @@ def get_porteiros():
         if conn:
             conn.close()
 
+
+
+#buscando sindicos
 @app.route('/sindicos', methods=['GET'])
 def get_sindicos():
     try:
@@ -239,7 +277,8 @@ def get_perfil(user_id):
         if conn:
             conn.close()
 
-            
+
+     #aqui tem atualizações       
 @app.route('/Signin', methods=['POST'])
 def signin():
     data = request.get_json()
@@ -250,22 +289,23 @@ def signin():
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
-       
+       #adicionar  tipo_usuario tbm aqui
         cursor.execute("""
             SELECT id, nome, sobrenome, cpf, telefone, 
-                   cep, rua, N_ap, numero, bairro, cidade, estado 
+                   cep, rua, N_ap, numero, bairro, cidade, estado ,  tipo_usuario
             FROM Cadastro 
             WHERE email = ? AND senha1 = ?
         """, (email, senha))
         user = cursor.fetchone()
 
+
         if user:
-            user_id = user[0]  
-            nome = user[1]  
-            sobrenome = user[2]  
-            telefone = user[4]  
-            
+            user_id = user[0]
+            nome = user[1]
+            sobrenome = user[2]
+            telefone = user[4]
             endereco = f"{user[5]} {user[6]}, {user[7]} {user[8]}, {user[9]}, {user[10]}, {user[11]}"
+            tipo_usuario = user[12]  # adicionar tipo_usuario 
 
             return jsonify({
                 'user': {
@@ -273,7 +313,8 @@ def signin():
                     'nome': nome,
                     'sobrenome': sobrenome,
                     'telefone': telefone,
-                    'endereco': endereco  
+                    'endereco': endereco,
+                     'tipo_usuario': tipo_usuario #adicionar tbm
                 }
             }), 200
         else:
@@ -372,6 +413,8 @@ def depositar():
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
+
+        
         url = "http://192.168.0.144"
         response = requests.get(url)
 
@@ -401,6 +444,8 @@ def entregar(morador_id):
 
         cursor.execute("SELECT id, nome_completo, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE morador_id = ?", (morador_id,))
         entregas = cursor.fetchall()
+
+   
 
         url = "http://192.168.0.144"
         response = requests.get(url)
@@ -494,30 +539,7 @@ def minhas_entregas(user_id):
             conn.close()
 
 
-    try:
-        conn = sqlite3.connect('meubanco.db')
-        cursor = conn.cursor()
-
-        data = request.json
-        novo_status = data.get('status')
-        data_retirada = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Formato da data
-
-        cursor.execute("""
-            UPDATE Tabela_de_Entregas 
-            SET status = ?, data_retirada = ? 
-            WHERE id = ?
-        """, (novo_status, data_retirada, entrega_id))
-        conn.commit()
-
-        return jsonify({'message': 'Status atualizado com sucesso', 'data_retirada': data_retirada}), 200
-
-    except sqlite3.Error as e:
-        print(f"Erro ao atualizar entrega: {e}")
-        return jsonify({'error': 'Erro ao atualizar entrega'}), 500
-
-    finally:
-        if conn:
-            conn.close()
+    
 
 
 if __name__ == '__main__':

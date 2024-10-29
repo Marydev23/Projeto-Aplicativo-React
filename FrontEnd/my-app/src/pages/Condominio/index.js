@@ -1,4 +1,4 @@
-// Condominio.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Button, Alert } from 'react-native';
 import { URL_API } from '../../utils/api-utils';
