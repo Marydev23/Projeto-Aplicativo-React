@@ -18,20 +18,20 @@ WiFiServer server(80); // CASO OCORRA PROBLEMAS COM A PORTA 80, UTILIZAR OUTRA (
 #define D7 13
 #define D8 15
 
-#define PAGINA_PORTARIA 0
-
+#define ABRE_TRANCA_1 1
+#define ABRE_TRANCA_2 2
 
 #define PAGINA_ERROR_404 -1
 
 
 // DEFINE OS PINOS A SEREM UTILIZADOS
-const int tranca = D4;
-
+const int armario1 = D2;
+const int armario2 = D4;
+const int acionamentoTrancas = D8;
 // ESTADO INICIAL DA TRANCA
 bool trancaStatus = false;
 
 void requisicao(String);
-
 
 //-----------------------------------------------------------------------------------------
 void setup()
@@ -40,8 +40,14 @@ void setup()
     delay(1);
 
     //Configura o modo dos pinos
-    pinMode(tranca, OUTPUT);
-    digitalWrite(tranca, !trancaStatus);
+    pinMode(armario1, OUTPUT);
+    digitalWrite(armario1, !trancaStatus);
+
+    pinMode(armario2, OUTPUT);
+    digitalWrite(armario2, !trancaStatus);
+
+    pinMode(acionamentoTrancas, OUTPUT);
+    digitalWrite(acionamentoTrancas, !trancaStatus);
 
     //Conexão na rede WiFi
     Serial.println();
@@ -80,19 +86,24 @@ void loop()
     while(!client.available()) {
       delay(1);
     }
-    String request2 = "\r";
     String request = client.readStringUntil('\r'); // FAZ LEITURA DA PRIMEIRA LINHA DA REQUISIÇÃO 
+    
+    
     requisicao(request); // TRATA O REQUEST
     Serial.println(request);
 
     int pag_id = 0;
-    if (request.indexOf("GET") == 0) {  // check if request method is GET
-        Serial.println("Abre porta corretamente");
+    if (request.indexOf("/armario1/On") > -1 || request.indexOf("/armario1/On.html") > -1) {
+      Serial.println("Armario 1 aberto");
+      pag_id = ABRE_TRANCA_1;
+    } else if (request.indexOf("/armario2/On") > -1 || request.indexOf("/armario2/On.html") > -1) {
+      Serial.println("Armario 2 aberto");
+      pag_id = ABRE_TRANCA_2;
     } else {  // 405 Method Not Allowed
       Serial.println("404 Not Found");
       pag_id = PAGINA_ERROR_404;
-      
     }
+    
     // send the HTTP response
     // send the HTTP response header
     if (pag_id == PAGINA_ERROR_404)
@@ -104,32 +115,38 @@ void loop()
     client.println("Connection: close");  // the connection will be closed after completion of the response
     client.println();                     // the separator between HTTP header and body
 
-    String html;
     switch (pag_id) {
+      case ABRE_TRANCA_1:
+        client.println("Armario 1 aberto com sucesso!");
+        break;
+      case ABRE_TRANCA_2:
+        client.println("Armario 2 aberto com sucesso!");
+        break; 
       case PAGINA_ERROR_404:
         client.println("Page Not Found");
         break;
     }
 
     delay(1);
-  //  Serial.println("Cliente desconectado");
-  //  Serial.println("");
-    client.flush(); 
 
-    client.flush();
+    client.flush(); 
 
   // give the web browser time to receive the data
     delay(1);
 }
 
-// FUNÇAO REQUISIÇÃO
-void requisicao(String request2){
-  if(request2.indexOf("GET") == 0)
-  {
+// FUNÇAO REQUISIÇÃO TRANCA1
+void requisicao(String request){
+  if(request.indexOf("/armario1/On") != -1) {
     trancaStatus = true; // ALTERA STATUS 
-    digitalWrite(tranca, !trancaStatus); // ON
+    digitalWrite(armario1, !trancaStatus); // ON
     delay(5000);
-    digitalWrite(tranca, trancaStatus);
+    digitalWrite(armario1, trancaStatus);
   }
-  
+ if(request.indexOf("/armario2/On") != -1) {
+    trancaStatus = true; // ALTERA STATUS 
+    digitalWrite(armario2, !trancaStatus); // ON
+    delay(5000);
+    digitalWrite(armario2, trancaStatus);
+  }
 }

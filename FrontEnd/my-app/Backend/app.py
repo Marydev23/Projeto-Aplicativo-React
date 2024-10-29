@@ -414,13 +414,17 @@ def depositar():
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
-        
-        url = "http://192.168.0.144"
-        response = requests.get(url)
-
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, nome_completo, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?, ?)""",
                        (morador_id, nome_completo, datetime.now().isoformat(), 'A retirar', armario_id))
+        if (armario_id == 1):
+            url = "http://192.168.0.144/armario2/On"
+            response = requests.get(url)
+        
+        else:
+            url = "http://192.168.0.144/armario1/On"
+            response = requests.get(url)
+
         conn.commit()
 
         
@@ -442,15 +446,12 @@ def entregar(morador_id):
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
-        cursor.execute("SELECT id, nome_completo, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE morador_id = ?", (morador_id,))
-        entregas = cursor.fetchall()
-
-   
-
-        url = "http://192.168.0.144"
-        response = requests.get(url)
+        cursor.execute("SELECT id, nome_completo, armario_id, data_entrega, status FROM Tabela_de_Entregas WHERE morador_id = ?", 
+                       (morador_id,))
+        entregas = cursor.fetchall() 
         
         result = []
+            
         for entrega in entregas:
             result.append({
                 'id': entrega[0],
@@ -459,8 +460,16 @@ def entregar(morador_id):
                 'data_entrega': entrega[3],
                 'status': entrega[4],
             })
-
+            
+        if(result[entrega[2]] == 1):
+            url = "http://192.168.0.144/armario1/On"
+            response = requests.get(url)
+        if(result[entrega[2]] == 2):
+            url = "http://192.168.0.144/armario2/On"
+            response = requests.get(url)    
+        
         return jsonify(result), 200
+        
 
     except sqlite3.Error as e:
         print(f"Erro ao buscar entregas: {e}")
@@ -481,7 +490,6 @@ def atualizar_entrega(entrega_id):
         novo_status = data.get('status')
         armario_id = data.get('armario_id')  
         data_retirada = datetime.now().strftime('%d/%m/%Y %I:%M:%S %p')
-
       
         cursor.execute("""UPDATE Tabela_de_Entregas 
                           SET status = ?, data_retirada = ? 
