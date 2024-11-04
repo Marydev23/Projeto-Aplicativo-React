@@ -27,7 +27,6 @@ const EntregarScreen = () => {
 
   const handleRetirar = async (entregaId) => {
     try {
-     
       await axios.put(URL_API + `/entregar/${entregaId}`, { 
         status: 'Retirado', 
         data_retirada: new Date().toISOString() 

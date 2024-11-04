@@ -3,58 +3,72 @@ import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { FontAwesome, Feather } from '@expo/vector-icons';
+import { useUser } from '../../contexts/UserContext';
 
-export default function Home() {
+export default function Home() { 
   const navigation = useNavigation();
+  const { userData } = useUser(); //adicionar
+
+  const userType = userData?.tipo_usuario; //adicionar
+  console.log('Tipo de Usuário:', userType); // adicionar 
 
   return (
     <View style={styles.container}>
-
-     
       <animatable.View style={styles.containerHeader}>
         <Text style={styles.message}>Olá! Seja bem-vindo.</Text>
         <Text style={styles.messageText}>O que deseja fazer?</Text>
       </animatable.View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Depositar')}>
-          <View style={styles.iconContainer}>
-            <Icon name="arrow-forward" size={30} color="#fff" /> 
-            <Icon name="cube" size={30} color="#fff" />
-          </View>
-          <Text style={styles.messageTextDR}>Depositar</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Retirar')}>
-          <View style={styles.iconContainer}>
-            <Icon name="arrow-back" size={30} color="#fff" />
-            <Icon name="cube" size={30} color="#fff" />
-          </View>
-          <Text style={styles.messageTextDR}>Retirar</Text>
-        </TouchableOpacity>
+        {/* Botão "Depositar" fica síndico e porteiro */}
+        {(userType === 'sindico' || userType === 'porteiro') && (
+          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Depositar')}>
+            <View style={styles.iconContainer}>
+              <Icon name="arrow-forward" size={30} color="#fff" /> 
+              <Icon name="cube" size={30} color="#fff" />
+            </View>
+            <Text style={styles.messageTextDR}>Depositar</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Botão "Retirar"moradores e síndico */}
+        {(userType === 'morador' || userType === 'sindico') && (
+          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Retirar')}>
+            <View style={styles.iconContainer}>
+              <Icon name="arrow-back" size={30} color="#fff" />
+              <Icon name="cube" size={30} color="#fff" />
+            </View>
+            <Text style={styles.messageTextDR}>Retirar</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('TabelaEntrega')}>
-          <Text style={styles.messageTextDR}>Minhas Entregas</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Condominio')}>    
-          <Text style={styles.messageTextDR}>Condomínio</Text>
-        </TouchableOpacity>
+        {/* Botão "Minhas Entregas"  moradores e síndico */}
+        {(userType === 'morador' || userType === 'sindico') && (
+          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('TabelaEntrega')}>
+            <Text style={styles.messageTextDR}>Minhas Entregas</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Botão "Condomínio" so p síndicos */}
+        {userType === 'sindico' && (
+          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Condominio')}>    
+            <Text style={styles.messageTextDR}>Condomínio</Text>
+          </TouchableOpacity>
+        )}
       </View>
-
-      
     </View>
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#D3D3D3',
-    
   },
   containerHeader: {
     marginTop: '14%',
@@ -99,30 +113,5 @@ const styles = StyleSheet.create({
     top: 15,
     left: 10,
     flexDirection: 'row',
-  },
-  iconPerfil: {
-    position: 'absolute',
-    top: 15,
-    left: 60,
-    flexDirection: 'row',
-  },
-  perfilContainer: {
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    width: '100%',
-      
-    
-  },
-
-  textSecure: {
-    fontSize: 20,
-    marginLeft: 10, 
-    marginTop: 15,
-  },
-  iconSecure: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start', 
-    marginBottom: 2, 
   },
 });
