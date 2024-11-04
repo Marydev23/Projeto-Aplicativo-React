@@ -412,23 +412,25 @@ def depositar():
 
     try:
         conn = sqlite3.connect('meubanco.db')
+
+        cursorr = conn.cursor()
+        cursorr.execute("SELECT id, numero_armario, status FROM Armario WHERE numero_armario = ?", (armario_id))
+        conn.commit()
+
+        armario = cursorr.fetchone()
+
+        if not armario:
+            return jsonify({'message': 'Armario não encontrado.'}), 400
+
+        url = "http://192.168.0.144/armario + " + armario[1] + "/On"
+        response = requests.get(url)
+
         cursor = conn.cursor()
 
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, nome_completo, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?, ?)""",
                        (morador_id, nome_completo, datetime.now().isoformat(), 'A retirar', armario_id))
-        if (armario_id == 1):
-            url = "http://192.168.0.144/armario2/On"
-            response = requests.get(url)
-        
-        else:
-            url = "http://192.168.0.144/armario1/On"
-            response = requests.get(url)
 
-        conn.commit()
-
-        
-        
         conn.commit()
         
         return jsonify({'message': 'Entrega registrada com sucesso.'}), 201
