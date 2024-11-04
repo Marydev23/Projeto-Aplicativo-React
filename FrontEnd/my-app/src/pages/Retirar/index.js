@@ -58,7 +58,7 @@ const EntregarScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title } >Retire seu pacote</Text>
+      <Text style={styles.title } >Retire seu pacote:</Text>
       <FlatList
         data={entregas.filter(entrega => entrega.status !== 'Retirado')} 
         keyExtractor={(item) => item.id.toString()}

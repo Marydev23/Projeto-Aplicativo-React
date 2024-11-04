@@ -32,6 +32,7 @@ def init_db():
         estado TEXT,
         senha1 TEXT NOT NULL,
         tipo_usuario TEXT NOT NULL
+        
     )
     """)
       
@@ -136,7 +137,7 @@ def cadastrar():
         """, (nome, sobrenome, cpf, email, telefone, cep, rua, N_ap, numero, bairro, cidade, estado, senha1, tipo_usuario))
         conn.commit()
 
-      #Adiciona o tipo de usuario (morador) na tabela Moradores
+
       
         if tipo_usuario == 'morador':
             cursor.execute("""
@@ -145,7 +146,7 @@ def cadastrar():
             """, (nome, sobrenome, N_ap, telefone))
             conn.commit()
 
-        #Adiciona o tipo de usuario (porteiro) na tabela Entregado
+        
 
         if tipo_usuario == 'porteiro':
             cursor.execute("""
@@ -156,8 +157,7 @@ def cadastrar():
 
 
 
-         #Adiciona o tipo de usuario (sindico) na tabela sindico
-
+         
         if tipo_usuario == 'sindico':
             cursor.execute("""
                 INSERT INTO sindico (nome, sobrenome,N_ap, telefone)
@@ -215,7 +215,7 @@ def get_porteiros():
         
         resultado = [{'id': morador[0], 'nome': morador[1], 'sobrenome': morador[2], 'N_ap': morador[3], 'telefone': morador[4]} for morador in moradores]
         return jsonify(resultado), 200
-
+        
     except sqlite3.Error as e:
         return jsonify({'error': f'Erro no banco de dados: {str(e)}'}), 500
     finally:
@@ -247,6 +247,7 @@ def get_sindicos():
             
 @app.route('/perfil/<int:user_id>', methods=['GET'])
 def get_perfil(user_id):
+
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
@@ -278,7 +279,11 @@ def get_perfil(user_id):
             conn.close()
 
 
+
+
      #aqui tem atualizações       
+
+
 @app.route('/Signin', methods=['POST'])
 def signin():
     data = request.get_json()
@@ -289,7 +294,7 @@ def signin():
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
 
-       #adicionar  tipo_usuario tbm aqui
+     
         cursor.execute("""
             SELECT id, nome, sobrenome, cpf, telefone, 
                    cep, rua, N_ap, numero, bairro, cidade, estado ,  tipo_usuario
@@ -396,8 +401,6 @@ def buscar_morador():
             conn.close()
 
 
-
-
 @app.route('/depositar', methods=['POST'])
 def depositar():
     data = request.get_json()
@@ -430,6 +433,16 @@ def depositar():
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, nome_completo, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?, ?)""",
                        (morador_id, nome_completo, datetime.now().isoformat(), 'A retirar', armario_id))
+<<<<<<< Updated upstream
+=======
+        #if (armario_id == 1):
+        #    url = "http://192.168.0.144/armario2/On"
+         #   response = requests.get(url)
+        
+       # else:
+        #    url = "http://192.168.0.144/armario1/On"
+         #   response = requests.get(url)
+>>>>>>> Stashed changes
 
         conn.commit()
         
@@ -463,12 +476,12 @@ def entregar(morador_id):
                 'status': entrega[4],
             })
             
-        if(result[entrega[2]] == 1):
-            url = "http://192.168.0.144/armario1/On"
-            response = requests.get(url)
-        if(result[entrega[2]] == 2):
-            url = "http://192.168.0.144/armario2/On"
-            response = requests.get(url)    
+        #if(result[entrega[2]] == 1):
+         #   url = "http://192.168.0.144/armario1/On"
+          #  response = requests.get(url)
+        #if(result[entrega[2]] == 2):
+         #   url = "http://192.168.0.144/armario2/On"
+          #  response = requests.get(url)    
         
         return jsonify(result), 200
         

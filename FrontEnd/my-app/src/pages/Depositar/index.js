@@ -5,7 +5,21 @@ import * as Animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { TextInput } from 'react-native';
+//import * as Notifications from 'expo-notifications';
 import { URL_API } from '../../utils/api-utils';
+
+
+
+//notificação
+//Notifications.setNotificationHandler({
+ // handleNotification: async () => ({
+   // shouldShowAlert: true,
+  //  shouldSetBadge: true,
+    //shouldSetBadge: true,
+  //}),
+//});
+
+
 
 export default function Depositar() {
   const navigation = useNavigation();
@@ -17,11 +31,12 @@ export default function Depositar() {
   const [entregaId, setEntregaId] = useState(null);
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  
 
   const handleButtonPress = (buttonType, entregaId) => {
     setSelectedButton(buttonType);
     setEntregaId(entregaId);
-  };
+  }; 
 
   const buscarMoradores = async () => {
     if (!nomeMorador) return;
@@ -41,10 +56,9 @@ export default function Depositar() {
         alert('Nenhum morador encontrado.');
       }
     } catch (error) {
-       // saiiuuuuuuu
-       //console.error(error);
+      
       } finally {
-        setLoading(false); //para
+        setLoading(false); 
     
     
       setLoading(false);
@@ -67,6 +81,9 @@ export default function Depositar() {
     }
   }, [nomeMorador, todosMoradores]);
 
+
+  
+
   const selecionarMorador = (morador) => {
     setNomeMorador(`${morador.nome} ${morador.sobrenome}`);
     setIdMorador(morador.id);
@@ -77,6 +94,23 @@ export default function Depositar() {
     
   };
 
+//notificação
+//  const enviarNotificacao = async (token) => {
+   
+    //await Notifications.scheduleNotificationAsync({
+    //  content: {
+     //   title: 'Notificação',
+      ////  body: 'Eba, sua encomenda chegou',
+       // data: {},
+      //},
+      //trigger: {
+       /// seconds: 5,
+     // },
+    ///});
+ // };
+  
+
+    
 
   const depositarEntrega = async () => {
     if (!entregaId) {
@@ -104,7 +138,13 @@ export default function Depositar() {
       const data = await response.json();
   
       if (response.ok) {
+        
+        //const token = await registrarToken(idMorador); // token do morador
+        //await enviarNotificacao(token);
+
+
         alert('Coloque o pacote no armário disponível!');
+        
         navigation.navigate('Home');
       } else {
         alert(data.message || 'Erro ao registrar entrega');
@@ -113,7 +153,8 @@ export default function Depositar() {
       console.error('Erro ao depositar entrega:', error);
     }
   };
-  
+
+
   return (
     <View style={styles.container}>
       <Animatable.View>

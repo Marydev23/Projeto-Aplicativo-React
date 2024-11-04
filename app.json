@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Projeto-Aplicativo-React",
+    "slug": "projeto-aplicativo-react",
+    "version": "1.0.0",
+    "sdkVersion": "51.0.0",
+    "platforms": [],
+    "android": {
+      "package": "com.anonymous.projetoaplicativoreact"
+    }
+  }
+}

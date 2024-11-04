@@ -27,6 +27,7 @@ const Tab = createBottomTabNavigator();
 function StackRoutes() {
   return (
     <Stack.Navigator>
+      
       <Stack.Screen
         name="Welcome"
         component={Welcome}
@@ -45,33 +46,41 @@ function StackRoutes() {
       <Stack.Screen
         name="Cadastro"
         component={Cadastro}
-        options={{ headerShown: false }}
+        options={{ headerShown: "Cadastro" }}
       />
       <Stack.Screen
         name="Depositar"
         component={Depositar}
-        options={{ headerShown: false }}
+        options={{ title: "Depositar",
+          headerStyle: { backgroundColor: '#006400' },
+          headerTintColor: '#fff'}}
       />
       <Stack.Screen
         name="Retirar"
         component={Retirar}
-        options={{ headerShown: false }}
+        options={{ title: "Retirar",
+          headerStyle: { backgroundColor: '#006400' },
+          headerTintColor: '#fff' }}
       />
       <Stack.Screen
         name="Perfil"
         component={Perfil}
-        options={{ headerShown: false }}
+        options={{ headerShown: "Perfil" }}
       />
       <Stack.Screen
         name="TabelaEntrega"
         component={TabelaEntrega}
-        options={{ headerShown: false }}
+        options={{ title: "Minhas Entregas",
+          headerStyle: { backgroundColor: '#006400' },
+          headerTintColor: '#fff' }}
       />
 
       <Stack.Screen
         name="Condominio"
         component={Condominio}
-        options={{ headerShown: false }}
+        options={{ title: "Condomínio",
+          headerStyle: { backgroundColor: '#006400' },
+          headerTintColor: '#fff' }}
       />
     </Stack.Navigator>
   );
@@ -101,6 +110,8 @@ function TabRoutes() {
             ),
           }} 
         />
+
+
 
 
        <Tab.Screen
@@ -139,8 +150,12 @@ function TabRoutes() {
             ),
 
             
+
+            
           }} 
         />
+
+        
 
 
     </Tab.Navigator>

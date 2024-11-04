@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    borderColor: '#000',
   },
   input: {
     borderWidth: 1,
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   editButton: {
-    backgroundColor: '#D3D3D3', 
+    backgroundColor: '#696969', 
   },
   saveButton: {
     backgroundColor: '#006400', 

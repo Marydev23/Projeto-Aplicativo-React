@@ -1,6 +1,14 @@
 {
   "dependencies": {
     "expo": "^51.0.38",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "react": "18.2.0",
+    "react-native": "0.74.5"
+  },
+  "name": "Projeto-Aplicativo-React",
+  "version": "1.0.0",
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   }
 }

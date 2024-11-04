@@ -1,16 +1,19 @@
 import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Image ,TouchableOpacity } from 'react-native';
 import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../../contexts/UserContext';
 
+
+
+
 export default function Home() { 
   const navigation = useNavigation();
-  const { userData } = useUser(); //adicionar
+  const { userData } = useUser(); 
 
-  const userType = userData?.tipo_usuario; //adicionar
-  console.log('Tipo de Usuário:', userType); // adicionar 
+  const userType = userData?.tipo_usuario; 
+  console.log('Tipo de Usuário:', userType);  
 
   return (
     <View style={styles.container}>
@@ -21,9 +24,9 @@ export default function Home() {
 
       <View style={styles.buttonContainer}>
 
-        {/* Botão "Depositar" fica síndico e porteiro */}
+      
         {(userType === 'sindico' || userType === 'porteiro') && (
-          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Depositar')}>
+          <TouchableOpacity style={userType === 'porteiro' ? styles.depositButton : styles.squareButton} onPress={() => navigation.navigate('Depositar')}>
             <View style={styles.iconContainer}>
               <Icon name="arrow-forward" size={30} color="#fff" /> 
               <Icon name="cube" size={30} color="#fff" />
@@ -32,10 +35,11 @@ export default function Home() {
           </TouchableOpacity>
         )}
 
-        {/* Botão "Retirar"moradores e síndico */}
+    
         {(userType === 'morador' || userType === 'sindico') && (
-          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Retirar')}>
+          <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} onPress={() => navigation.navigate('Retirar')}>
             <View style={styles.iconContainer}>
+              
               <Icon name="arrow-back" size={30} color="#fff" />
               <Icon name="cube" size={30} color="#fff" />
             </View>
@@ -46,17 +50,37 @@ export default function Home() {
 
       <View style={styles.buttonContainer}>
 
-        {/* Botão "Minhas Entregas"  moradores e síndico */}
+        
         {(userType === 'morador' || userType === 'sindico') && (
-          <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('TabelaEntrega')}>
-            <Text style={styles.messageTextDR}>Minhas Entregas</Text>
+          <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} onPress={() => navigation.navigate('TabelaEntrega')}>
+            <Text style={styles.messageTextDR}>Entregas</Text>
+            <View style={styles.iconContainer}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Image
+                source={require('../../assets/maoecaixa.png')}
+                style={{ width: '100%', tintColor: '#fff' }} 
+                resizeMode="contain"
+              />
+            </View>
+            </View>
+            
           </TouchableOpacity>
         )}
 
-        {/* Botão "Condomínio" so p síndicos */}
+        
         {userType === 'sindico' && (
           <TouchableOpacity style={styles.squareButton} onPress={() => navigation.navigate('Condominio')}>    
             <Text style={styles.messageTextDR}>Condomínio</Text>
+            <View style={styles.iconContainer}>
+
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Image
+                source={require('../../assets/predio.png')}
+                style={{ width: '100%', tintColor: '#fff' }} 
+                resizeMode="contain"
+              />
+           </View>
+           </View>
           </TouchableOpacity>
         )}
       </View>
@@ -64,15 +88,15 @@ export default function Home() {
   );
 }
 
-// Estilos
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#D3D3D3',
   },
   containerHeader: {
-    marginTop: '14%',
-    marginBottom: '8%',
+    marginTop: '15%',
+    marginBottom: '25%',
     paddingStart: '5%',
   },
   message: {
@@ -88,6 +112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
+    
   },
   squareButton: {
     width: 150,
@@ -101,7 +126,7 @@ const styles = StyleSheet.create({
   },
   messageTextDR: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
     position: 'absolute',
@@ -110,8 +135,21 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     position: 'absolute',
-    top: 15,
-    left: 10,
+    top: 20,
+    left: 'center',
     flexDirection: 'row',
+
+    
   },
+  depositButton: {
+    width: '80%', 
+    height: 120,
+    backgroundColor: '#006400',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10, 
+  },
+
+  
 });

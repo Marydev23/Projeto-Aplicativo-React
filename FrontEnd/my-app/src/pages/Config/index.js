@@ -19,7 +19,11 @@ export default function Settings() {
         <Text style={styles.aboutTitle}>Sobre</Text>
         <Text style={styles.aboutText}>Aplicativo de Gestão de Entregas</Text>
         <Text style={styles.aboutText}>Versão: 1.0.0</Text>
-        <Text style={styles.aboutText}>Desenvolvido por: Marilza, Matheus e Juliano </Text>
+        <Text style={styles.aboutText}>Desenvolvido por:</Text>
+        <Text style={styles.aboutText}>Marilza de Souza Santos</Text>
+        <Text style={styles.aboutText}>Matheus Felipe Braga de Souza</Text>
+        <Text style={styles.aboutText}>Juliano Fernandes Teodoro</Text>
+
         <Text style={styles.aboutText}>Matéria: Programacao Dispositivos Moveis Em Android</Text>
       </View>
 
@@ -43,7 +47,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   aboutSection: {
-    backgroundColor: '#A9A9A9',
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
     marginBottom: 20,
@@ -51,12 +55,12 @@ const styles = StyleSheet.create({
   aboutTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
     marginBottom: 10,
   },
   aboutText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#000',
     marginBottom: 5,
   },
   backButton: {

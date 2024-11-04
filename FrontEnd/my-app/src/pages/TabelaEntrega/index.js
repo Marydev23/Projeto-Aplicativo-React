@@ -13,7 +13,8 @@ const EntregarScreen = () => {
       if (userData && userData.id) {
         try {
           const response = await axios.get(URL_API + `/entregar/${userData.id}`); 
-          setEntregas(response.data);
+          const entregasRetiradas = response.data.filter(entrega => entrega.status === 'Retirado');
+          setEntregas(entregasRetiradas);
         } catch (error) {
           console.error(error);
         }
@@ -40,7 +41,7 @@ const EntregarScreen = () => {
         )
       );
 
-      Alert.alert('Retira seu pacote.');
+     Alert.alert('Retira seu pacote.');
     } catch (error) {
       console.error(error);
       Alert.alert('Erro', 'Não foi possível atualizar o status da entrega.');
@@ -63,7 +64,7 @@ const EntregarScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Minhas Entregas</Text>
+      <Text style={styles.title}>Histórico de Entregas:</Text>
       <FlatList
         data={entregas}
         keyExtractor={(item) => item.id.toString()} 
