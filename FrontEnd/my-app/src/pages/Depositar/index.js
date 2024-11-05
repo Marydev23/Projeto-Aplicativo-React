@@ -100,7 +100,7 @@ export default function Depositar() {
     //await Notifications.scheduleNotificationAsync({
     //  content: {
      //   title: 'Notificação',
-      ////  body: 'Eba, sua encomenda chegou',
+      //  body: 'Eba, sua encomenda chegou',
        // data: {},
       //},
       //trigger: {

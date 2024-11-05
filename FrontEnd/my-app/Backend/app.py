@@ -416,33 +416,18 @@ def depositar():
     try:
         conn = sqlite3.connect('meubanco.db')
 
-        cursorr = conn.cursor()
-        cursorr.execute("SELECT id, numero_armario, status FROM Armario WHERE numero_armario = ?", (armario_id))
-        conn.commit()
-
-        armario = cursorr.fetchone()
-
-        if not armario:
-            return jsonify({'message': 'Armario não encontrado.'}), 400
-
-        url = "http://192.168.0.144/armario + " + armario[1] + "/On"
-        response = requests.get(url)
-
+        if(armario_id == 1):
+            url = "http://192.168.0.144/armario1/On"
+            response = requests.get(url)
+        if(armario_id == 2):
+            url = "http://192.168.0.144/armario2/On"
+            response = requests.get(url)    
+        
         cursor = conn.cursor()
 
         cursor.execute("""INSERT INTO Tabela_de_Entregas (morador_id, nome_completo, data_entrega, status, armario_id)
                           VALUES (?, ?, ?, ?, ?)""",
                        (morador_id, nome_completo, datetime.now().isoformat(), 'A retirar', armario_id))
-<<<<<<< Updated upstream
-=======
-        #if (armario_id == 1):
-        #    url = "http://192.168.0.144/armario2/On"
-         #   response = requests.get(url)
-        
-       # else:
-        #    url = "http://192.168.0.144/armario1/On"
-         #   response = requests.get(url)
->>>>>>> Stashed changes
 
         conn.commit()
         
@@ -475,13 +460,6 @@ def entregar(morador_id):
                 'data_entrega': entrega[3],
                 'status': entrega[4],
             })
-            
-        #if(result[entrega[2]] == 1):
-         #   url = "http://192.168.0.144/armario1/On"
-          #  response = requests.get(url)
-        #if(result[entrega[2]] == 2):
-         #   url = "http://192.168.0.144/armario2/On"
-          #  response = requests.get(url)    
         
         return jsonify(result), 200
         
@@ -503,8 +481,20 @@ def atualizar_entrega(entrega_id):
 
         data = request.json
         novo_status = data.get('status')
-        armario_id = data.get('armario_id')  
         data_retirada = datetime.now().strftime('%d/%m/%Y %I:%M:%S %p')
+        
+        cursor.execute("SELECT armario_id FROM Tabela_de_Entregas WHERE id = ?", 
+                       (entrega_id,))
+        armario = cursor.fetchall() 
+        
+        
+        armario =  str(armario).strip("[(),]")
+        if(armario == "1"):
+            url = "http://192.168.0.144/armario1/On"
+            response = requests.get(url)
+        if(armario == "2"):
+            url = "http://192.168.0.144/armario2/On"
+            response = requests.get(url)    
       
         cursor.execute("""UPDATE Tabela_de_Entregas 
                           SET status = ?, data_retirada = ? 
