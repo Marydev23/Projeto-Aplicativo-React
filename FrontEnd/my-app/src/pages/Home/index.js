@@ -1,19 +1,56 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, Image ,TouchableOpacity } from 'react-native';
 import * as animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../../contexts/UserContext';
-
-
+import * as LocalAuthentication from 'expo-local-authentication';
 
 
 export default function Home() { 
   const navigation = useNavigation();
   const { userData } = useUser(); 
-
   const userType = userData?.tipo_usuario; 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   console.log('Tipo de Usuário:', userType);  
+  
+    async function verifyAvaiableAuthentication() {
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      console.log(compatible);
+  
+      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      console.log(types.map(type => LocalAuthentication.AuthenticationType[type]));
+    }
+  
+    async function handleAuthentication() {
+      const isBiometricEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if(!isBiometricEnrolled){
+        return Alert.alert('Atenção', 'Nenhuma biometria encontrada. Por favor, Cadastre no dispositivo!');
+      }
+  
+      const auth = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Secure Mail',
+        fallbackLabel: 'Biometria não reconhecida'
+  
+      });
+      
+      setIsAuthenticated(auth.success);
+    }
+    
+    useEffect(() => {
+      verifyAvaiableAuthentication();
+    }, []);
+  
+  function retirarHandleAuthentication() {
+    
+    handleAuthentication();
+    IsAuthenticated ? navigation.navigate('Retirar') : navigation.navigate('Home');
+  }
+  function entregasHandleAuthentication() {
+    handleAuthentication();
+    isAuthenticated ? navigation.navigate('TabelaEntrega') : navigation.navigate('Home');
+    
+  }
 
   return (
     <View style={styles.container}>
@@ -37,13 +74,14 @@ export default function Home() {
 
     
         {(userType === 'morador' || userType === 'sindico') && (
-          <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} onPress={() => navigation.navigate('Retirar')}>
+          <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} 
+          onPress={() => {isAuthenticated ? navigation.navigate('Retirar') : handleAuthentication()}}>
             <View style={styles.iconContainer}>
               
               <Icon name="arrow-back" size={30} color="#fff" />
               <Icon name="cube" size={30} color="#fff" />
             </View>
-            <Text style={styles.messageTextDR}>Retirar</Text>
+            <Text style={styles.messageTextDR}>{isAuthenticated ? 'Entrar' : 'Retirar'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -52,8 +90,9 @@ export default function Home() {
 
         
         {(userType === 'morador' || userType === 'sindico') && (
-          <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} onPress={() => navigation.navigate('TabelaEntrega')}>
-            <Text style={styles.messageTextDR}>Entregas</Text>
+          <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} 
+          onPress={() => {isAuthenticated ? navigation.navigate('TabelaEntrega') : handleAuthentication()}}>
+            <Text style={styles.messageTextDR}>{isAuthenticated ? 'Acessar' : 'Entregas'}</Text>
             <View style={styles.iconContainer}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <Image
