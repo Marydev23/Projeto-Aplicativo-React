@@ -85,16 +85,17 @@ export default function Notificacao() {
   }
   
   async function schedulePushNotification() {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Chegou!!",
-          body: "Sua entrega chegou!!",
-          data: {}
-        },
-        trigger: {
-          seconds: 60
-        }
-      })
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Chegou!!",
+        body: "Sua entrega chegou!!",
+        data: {}
+      },
+      trigger: {
+        seconds: 5
+      }
+    })
+      
   }
 
   const [expoToken, setExpoToken] = useState("")
@@ -103,11 +104,11 @@ export default function Notificacao() {
   const notificationReceiverRef = useRef()
   const notificationResponseRef = useRef()
 
-  useEffect(() => {
+  useEffect(() =>  {
     registerForPushNotificationsAsync().then(token => token && setExpoToken(token));
 
     if (Platform.OS === 'android') {
-      Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
+       Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
     }
 
     notificationReceiverRef.current = Notifications.addNotificationReceivedListener(notification => {
@@ -122,6 +123,8 @@ export default function Notificacao() {
       console.log("Notification response received: " + notification)
 
     })
+
+   schedulePushNotification();
     return () => {
       notificationReceiverRef.current &&
         Notifications.removeNotificationSubscription(notificationReceiverRef.current);
@@ -149,9 +152,6 @@ export default function Notificacao() {
       </TouchableOpacity>
       <Text>Your expo push token: {expoToken}</Text>
 
-      <Button title='Chamar notificacoes' onPress={async () => {
-        await schedulePushNotification();
-      }}></Button>
     </View>
   );
 }
