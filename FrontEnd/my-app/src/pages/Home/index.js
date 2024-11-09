@@ -40,17 +40,6 @@ export default function Home() {
     useEffect(() => {
       verifyAvaiableAuthentication();
     }, []);
-  
-  function retirarHandleAuthentication() {
-    
-    handleAuthentication();
-    IsAuthenticated ? navigation.navigate('Retirar') : navigation.navigate('Home');
-  }
-  function entregasHandleAuthentication() {
-    handleAuthentication();
-    isAuthenticated ? navigation.navigate('TabelaEntrega') : navigation.navigate('Home');
-    
-  }
 
   return (
     <View style={styles.container}>
@@ -63,12 +52,12 @@ export default function Home() {
 
       
         {(userType === 'sindico' || userType === 'porteiro') && (
-          <TouchableOpacity style={userType === 'porteiro' ? styles.depositButton : styles.squareButton} onPress={() => navigation.navigate('Depositar')}>
+          <TouchableOpacity style={userType === 'porteiro' ? styles.depositButton : styles.squareButton} onPress={() => {isAuthenticated ? navigation.navigate('Depositar') : handleAuthentication()}}>
             <View style={styles.iconContainer}>
               <Icon name="arrow-forward" size={30} color="#fff" /> 
               <Icon name="cube" size={30} color="#fff" />
             </View>
-            <Text style={styles.messageTextDR}>Depositar</Text>
+            <Text style={styles.messageTextDR}>{isAuthenticated ? 'Depositar' : 'Desbloquear\ndepósito'}</Text>
           </TouchableOpacity>
         )}
 
@@ -81,7 +70,7 @@ export default function Home() {
               <Icon name="arrow-back" size={30} color="#fff" />
               <Icon name="cube" size={30} color="#fff" />
             </View>
-            <Text style={styles.messageTextDR}>{isAuthenticated ? 'Entrar' : 'Retirar'}</Text>
+            <Text style={styles.messageTextDR}>{isAuthenticated ? 'Retirar' : 'Desbloquear\narmário'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -91,8 +80,8 @@ export default function Home() {
         
         {(userType === 'morador' || userType === 'sindico') && (
           <TouchableOpacity style={userType === 'morador' ? styles.depositButton : styles.squareButton} 
-          onPress={() => {isAuthenticated ? navigation.navigate('TabelaEntrega') : handleAuthentication()}}>
-            <Text style={styles.messageTextDR}>{isAuthenticated ? 'Acessar' : 'Entregas'}</Text>
+          onPress={() => navigation.navigate('TabelaEntrega')}>
+            <Text style={styles.messageTextDR}>Histórico</Text>
             <View style={styles.iconContainer}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <Image
@@ -165,7 +154,7 @@ const styles = StyleSheet.create({
   },
   messageTextDR: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
     position: 'absolute',
