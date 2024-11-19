@@ -6,3 +6,5 @@ node_modules/.bin/fa-upgrade.sh.cmd
 /node_modules
 /node_modules/.bin
 /.vs
+FrontEnd/my-app/Backend/.idea/.name
+FrontEnd/my-app/Backend/secret.py

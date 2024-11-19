@@ -2,8 +2,6 @@
 # INICIANDO PYTHON 
 cd FrontEnd/my-app/Backend
 
-# PELO TERMINAL
-.\venv\Scripts\activate 
 
 # PELO BASH
 ./venv/Scripts/activate

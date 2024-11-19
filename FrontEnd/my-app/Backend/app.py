@@ -4,8 +4,32 @@ import sqlite3
 from flask_cors import CORS
 from datetime import datetime 
 import requests
+from twilio.rest import Client
+import secret
 
 app = Flask(__name__)
+
+class SMSHandler:
+    def __init__(self):
+       self.account_sid = secret.sid
+       self.auth_token = secret.token
+       self.client = Client(self.account_sid, self.auth_token)
+       self.numero_origem = secret.origem
+
+
+    def enviar_sms(self, numero_destino):
+        mensagem_texto = f'Ebá!\nVocê acabou de receber uma encomenda.\nEntre no aplicativo para verificar, e vá até o armário para fazer a retirada.'
+
+        try:
+            message = self.client.messages.create(
+                body=mensagem_texto,
+                from_=self.numero_origem,
+                to=numero_destino
+            )
+            print(f'Mensagem enviada com SID: {message.sid}')
+        except Exception as e:
+            print(f"Erro ao enviar mensagem: {e}")
+
 CORS(app)
 
 @app.route('/')
@@ -32,7 +56,6 @@ def init_db():
         estado TEXT,
         senha1 TEXT NOT NULL,
         tipo_usuario TEXT NOT NULL
-        
     )
     """)
       
@@ -73,9 +96,6 @@ def init_db():
             )
         ''')
 
-
-
-  
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Tabela_de_Entregas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,11 +112,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 init_db()
 
-#aqui tem atualizações
-@app.route('/cadastro', methods=['POST'])
+app.route('/cadastro', methods=['POST'])
 def cadastrar():
     data = request.get_json()
     print("Dados recebidos:", data)  
@@ -116,7 +134,6 @@ def cadastrar():
     senha1 = data.get('senha1')
     senha2 = data.get('senha2')
     tipo_usuario = data.get('tipo_usuario')
-
     
     if not nome or not sobrenome or not email or not senha1 or not senha2:
         print("Erro: Campos obrigatórios ausentes.")
@@ -136,8 +153,6 @@ def cadastrar():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (nome, sobrenome, cpf, email, telefone, cep, rua, N_ap, numero, bairro, cidade, estado, senha1, tipo_usuario))
         conn.commit()
-
-
       
         if tipo_usuario == 'morador':
             cursor.execute("""
@@ -146,17 +161,12 @@ def cadastrar():
             """, (nome, sobrenome, N_ap, telefone))
             conn.commit()
 
-        
-
         if tipo_usuario == 'porteiro':
             cursor.execute("""
                 INSERT INTO Entregador (nome, sobrenome,N_ap, telefone)
                 VALUES (?, ?,?, ?)
             """, (nome, sobrenome, N_ap, telefone))
             conn.commit()
-
-
-
          
         if tipo_usuario == 'sindico':
             cursor.execute("""
@@ -164,7 +174,6 @@ def cadastrar():
                 VALUES (?, ?,?, ?)
             """, (nome, sobrenome, N_ap, telefone))
             conn.commit()
-
 
         print("Dados inseridos com sucesso.")
         return jsonify({'message': 'Dados cadastrados com sucesso.'}), 201
@@ -180,14 +189,11 @@ def cadastrar():
             
             print("Conexão com o banco fechada.")
 
-#buscando moradores
-
 @app.route('/moradores', methods=['GET'])
 def get_moradores():
     try:
         conn = sqlite3.connect('meubanco.db', timeout=10)
         cursor = conn.cursor()
-        
         
         cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'morador'")
         moradores = cursor.fetchall()
@@ -201,15 +207,12 @@ def get_moradores():
         if conn:
             conn.close()
 
-#buscando porteiros
-
 @app.route('/porteiros', methods=['GET'])
 def get_porteiros():
     try:
         conn = sqlite3.connect('meubanco.db', timeout=10)
         cursor = conn.cursor()
-        
-        
+                
         cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'porteiro'")
         moradores = cursor.fetchall()
         
@@ -222,16 +225,12 @@ def get_porteiros():
         if conn:
             conn.close()
 
-
-
-#buscando sindicos
 @app.route('/sindicos', methods=['GET'])
 def get_sindicos():
     try:
         conn = sqlite3.connect('meubanco.db', timeout=10)
         cursor = conn.cursor()
-        
-       
+               
         cursor.execute("SELECT id, nome, sobrenome, N_ap, telefone FROM Cadastro WHERE tipo_usuario = 'sindico'")
         sindicos = cursor.fetchall()
         
@@ -243,15 +242,13 @@ def get_sindicos():
     finally:
         if conn:
             conn.close()
-
-            
+    
 @app.route('/perfil/<int:user_id>', methods=['GET'])
 def get_perfil(user_id):
 
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
-
         
         cursor.execute("""
             SELECT id, armario_id, data_entrega, status 
@@ -278,12 +275,6 @@ def get_perfil(user_id):
         if conn:
             conn.close()
 
-
-
-
-     #aqui tem atualizações       
-
-
 @app.route('/Signin', methods=['POST'])
 def signin():
     data = request.get_json()
@@ -293,7 +284,6 @@ def signin():
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
-
      
         cursor.execute("""
             SELECT id, nome, sobrenome, cpf, telefone, 
@@ -303,14 +293,13 @@ def signin():
         """, (email, senha))
         user = cursor.fetchone()
 
-
         if user:
             user_id = user[0]
             nome = user[1]
             sobrenome = user[2]
             telefone = user[4]
             endereco = f"{user[5]} {user[6]}, {user[7]} {user[8]}, {user[9]}, {user[10]}, {user[11]}"
-            tipo_usuario = user[12]  # adicionar tipo_usuario 
+            tipo_usuario = user[12]  
 
             return jsonify({
                 'user': {
@@ -319,7 +308,7 @@ def signin():
                     'sobrenome': sobrenome,
                     'telefone': telefone,
                     'endereco': endereco,
-                     'tipo_usuario': tipo_usuario #adicionar tbm
+                     'tipo_usuario': tipo_usuario 
                 }
             }), 200
         else:
@@ -333,7 +322,6 @@ def signin():
         if conn:
             conn.close()
 
-
 @app.route('/Armario', methods=['POST'])
 def criar_armario():
     data = request.get_json()
@@ -346,8 +334,7 @@ def criar_armario():
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
-        
-        
+                
         cursor.execute("SELECT COUNT(*) FROM Armario WHERE numero_armario = ?", (numero_armario,))
         existe = cursor.fetchone()[0]
 
@@ -378,7 +365,6 @@ def buscar_morador():
         conn = sqlite3.connect('meubanco.db', timeout=10)
         cursor = conn.cursor()
 
-        
         print(f'Buscando morador: Nome: {nome}, Sobrenome: {sobrenome}')
 
         if sobrenome:
@@ -400,11 +386,9 @@ def buscar_morador():
         if conn:
             conn.close()
 
-
 @app.route('/depositar', methods=['POST'])
 def depositar():
-    data = request.get_json()
-    
+    data = request.get_json()    
     morador_id = data.get('morador_id')  
     nome_completo = data.get('nome_completo')  
     senha = data.get('senha')
@@ -431,6 +415,10 @@ def depositar():
 
         conn.commit()
         
+        cursor.execute("SELECT telefone FROM Cadastro WHERE id = ?", (nome_completo,))
+        morador_telefone = secret.telefoneDestino
+        sms_handler = SMSHandler()
+        sms_handler.enviar_sms(morador_telefone)
         return jsonify({'message': 'Entrega registrada com sucesso.'}), 201
     except sqlite3.Error as e:
         print(f"Erro ao registrar entrega: {e}") 
@@ -438,7 +426,6 @@ def depositar():
     finally:
         if conn:
             conn.close()
-
 
 @app.route('/entregar/<int:morador_id>', methods=['GET'])
 def entregar(morador_id):
@@ -463,7 +450,6 @@ def entregar(morador_id):
         
         return jsonify(result), 200
         
-
     except sqlite3.Error as e:
         print(f"Erro ao buscar entregas: {e}")
         return jsonify({'error': 'Erro ao buscar entregas'}), 500
@@ -471,7 +457,6 @@ def entregar(morador_id):
     finally:
         if conn:
             conn.close()
-
 
 @app.route('/entregar/<int:entrega_id>', methods=['PUT'])
 def atualizar_entrega(entrega_id):
@@ -486,8 +471,7 @@ def atualizar_entrega(entrega_id):
         cursor.execute("SELECT armario_id FROM Tabela_de_Entregas WHERE id = ?", 
                        (entrega_id,))
         armario = cursor.fetchall() 
-        
-        
+                
         armario =  str(armario).strip("[(),]")
         if(armario == "1"):
             url = "http://192.168.0.144/armario1/On"
@@ -501,7 +485,6 @@ def atualizar_entrega(entrega_id):
                           WHERE id = ?""", 
                        (novo_status, data_retirada, entrega_id))
 
-        
         conn.commit()
 
         return jsonify({'message': 'Entrega atualizada e armário liberado com sucesso.'}), 200
@@ -514,20 +497,15 @@ def atualizar_entrega(entrega_id):
         if conn:
             conn.close()
 
-
-            
-
 @app.route('/minhas-entregas/<int:user_id>', methods=['GET'])
 def minhas_entregas(user_id):
     try:
         conn = sqlite3.connect('meubanco.db')
         cursor = conn.cursor()
-        
-       
+               
         cursor.execute("SELECT * FROM Tabela_de_Entregas WHERE id_usuario = ?", (user_id,))
         entregas = cursor.fetchall()
 
-       
         if not entregas:
             return jsonify([]), 200
 
@@ -550,10 +528,6 @@ def minhas_entregas(user_id):
     finally:
         if conn:
             conn.close()
-
-
     
-
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True) 
