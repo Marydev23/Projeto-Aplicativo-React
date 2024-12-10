@@ -1,9 +1,7 @@
 -------------------------------------
-# INICIANDO PYTHON 
+# INICIANDO PYTHON PELO BASH
 cd FrontEnd/my-app/Backend
 
-
-# PELO BASH
 ./venv/Scripts/activate
 
 python app.py

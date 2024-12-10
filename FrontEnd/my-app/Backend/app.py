@@ -393,6 +393,7 @@ def depositar():
     nome_completo = data.get('nome_completo')  
     senha = data.get('senha')
     armario_id = data.get('armario_id')
+    URL_IOT = "http://192.168.0.144"
 
     if not morador_id or not senha or not nome_completo or not armario_id:
         return jsonify({'message': 'Morador ID, nome completo, senha e armário ID são obrigatórios.'}), 400
@@ -401,10 +402,10 @@ def depositar():
         conn = sqlite3.connect('meubanco.db')
 
         if(armario_id == 1):
-            url = "http://192.168.0.144/armario1/On"
+            url = URL_IOT + "/armario1/On"
             response = requests.get(url)
         if(armario_id == 2):
-            url = "http://192.168.0.144/armario2/On"
+            url = URL_IOT + "/armario2/On"
             response = requests.get(url)    
         
         cursor = conn.cursor()
@@ -467,6 +468,7 @@ def atualizar_entrega(entrega_id):
         data = request.json
         novo_status = data.get('status')
         data_retirada = datetime.now().strftime('%d/%m/%Y %I:%M:%S %p')
+        URL_IOT = "http://192.168.0.144"
         
         cursor.execute("SELECT armario_id FROM Tabela_de_Entregas WHERE id = ?", 
                        (entrega_id,))
@@ -474,10 +476,10 @@ def atualizar_entrega(entrega_id):
                 
         armario =  str(armario).strip("[(),]")
         if(armario == "1"):
-            url = "http://192.168.0.144/armario1/On"
+            url = URL_IOT + "/armario1/On"
             response = requests.get(url)
         if(armario == "2"):
-            url = "http://192.168.0.144/armario2/On"
+            url = URL_IOT + "/armario2/On"
             response = requests.get(url)    
       
         cursor.execute("""UPDATE Tabela_de_Entregas 

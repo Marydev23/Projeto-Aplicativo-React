@@ -70,7 +70,6 @@ const EntregarScreen = () => {
       </TouchableOpacity>
     </View>
 
-    //onPress={() => navigation.navigate('Home');
   );
 };
 
